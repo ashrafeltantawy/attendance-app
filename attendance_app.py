@@ -4,6 +4,11 @@ import os
 import re
 from io import BytesIO
 
+
+# تحميل ملف CSS
+with open("static/style.css") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
 # -------------------- إعداد الصفحة --------------------
 st.set_page_config(page_title="نموذج حضور", layout="centered")
 
@@ -32,6 +37,13 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
+# عرض الشعار العلوي
+st.markdown("""
+    <div style='text-align:center; margin-top: -30px;'>
+        <img src='static/logo.svg' width='120'>
+    </div>
+""", unsafe_allow_html=True)
 
 st.title("📋 نموذج حضور — تسجيل البيانات")
 st.write("املأ البيانات التالية. النموذج متجاوب ويعمل باللمس على الآيباد أو الهاتف.")

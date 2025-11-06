@@ -1,0 +1,86 @@
+/* ==== الخلفية العامة ==== */
+body {
+    background-color: #fff9f1;
+    background-image: radial-gradient(circle at 20% 20%, #fce7e1 0%, transparent 40%),
+                      radial-gradient(circle at 80% 80%, #fde3e9 0%, transparent 40%);
+    font-family: 'Poppins', sans-serif;
+}
+
+/* ==== شعار علوي ==== */
+img[src$="logo.svg"] {
+    margin-top: 40px;
+    margin-bottom: 10px;
+    filter: drop-shadow(0px 3px 5px rgba(0,0,0,0.1));
+}
+
+
+/* ==== الصندوق الرئيسي ==== */
+main {
+    background-color: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.08);
+    padding: 3rem 2.5rem;
+    width: 90%;
+    max-width: 480px;
+    margin: 3rem auto;
+}
+
+/* ==== العناوين ==== */
+h1, h2, h3 {
+    text-align: center;
+    color: #2e3b84;
+    font-weight: 700;
+}
+
+/* ==== حقول الإدخال ==== */
+.stTextInput>div>div>input {
+    background-color: #f4f4f4;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 16px;
+}
+
+.stTextInput>div>label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 6px;
+    display: block;
+}
+
+/* ==== زر التسجيل ==== */
+.stButton>button {
+    background-color: #2e3fb4;
+    color: #fff;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 16px;
+    width: 100%;
+    transition: 0.3s ease;
+}
+
+.stButton>button:hover {
+    background-color: #1f2d80;
+    transform: translateY(-2px);
+}
+
+/* ==== الأيقونات ==== */
+.css-1kyxreq, .css-1q8dd3e {
+    color: #2e3fb4;
+    font-size: 20px;
+}
+
+/* ==== نصوص إضافية ==== */
+p, li, span {
+    color: #555;
+    font-size: 15px;
+}
+
+/* ==== الملاحظات أسفل النموذج ==== */
+hr {
+    border: none;
+    border-top: 1px solid #eee;
+    margin: 2rem 0;
+}
