@@ -1,59 +1,38 @@
 import streamlit as st
 import pandas as pd
-import os
-import re
-from io import BytesIO
+from pathlib import Path
+from datetime import datetime
 
+st.set_page_config(page_title="Attendance App", page_icon="📝", layout="centered")
 
-# تحميل ملف CSS
+# تحميل CSS
 with open("static/style.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
+# خلفية الموجة
+st.markdown("<div class='wave-bg'></div>", unsafe_allow_html=True)
 
-# خلفية الموجة (في الأعلى فقط)
-st.markdown("""
-    <div class='wave-bg'></div>
-    <div style='height:120px'></div>
-""", unsafe_allow_html=True)
+# مسافة علشان المحتوى يظهر بعد الموجة
+st.markdown("<div style='height:180px'></div>", unsafe_allow_html=True)
 
+# عرض الشعار
+from pathlib import Path
+logo_path = Path("static/logo.svg")
+if logo_path.exists():
+    with open(logo_path, "r") as f:
+        logo_data = f.read()
+    st.markdown(
+        f"""
+        <div style='text-align:center; margin-bottom:10px;'>
+            {logo_data}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
-# -------------------- إعداد الصفحة --------------------
-st.set_page_config(page_title="نموذج حضور", layout="centered")
+# العنوان الرئيسي
+st.title("نموذج تسجيل الحضور")
 
-# تحسين تجربة اللمس عبر CSS بسيط
-st.markdown(
-    """
-    <style>
-    input, button, textarea {
-        font-size: 20px !important;
-        padding: 12px 16px !important;
-        border-radius: 12px !important;
-    }
-    label, .stTextInput label, .stDownloadButton label {
-        font-size: 20px !important;
-    }
-    .stButton>button {
-        background-color: #007AFF !important;
-        color: white !important;
-        border-radius: 16px !important;
-        padding: 14px 24px !important;
-        font-size: 22px !important;
-        font-weight: bold;
-        width: 100%;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-# عرض الشعار العلوي
-st.markdown("""
-    <div style='text-align:center; margin-top: -30px;'>
-        <img src='static/logo.svg' width='120'>
-    </div>
-""", unsafe_allow_html=True)
-
-st.title("📋 نموذج حضور — تسجيل البيانات")
 st.write("املأ البيانات التالية. النموذج متجاوب ويعمل باللمس على الآيباد أو الهاتف.")
 
 # -------------------- ملف حفظ البيانات --------------------
