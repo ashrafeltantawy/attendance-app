@@ -1,124 +1,150 @@
-/* ==== الخلفية العامة مع موجة ==== */
-body {
-    background-color: #fff9f1;
-    background-image:
-        radial-gradient(circle at 20% 20%, #fce7e1 0%, transparent 40%),
-        radial-gradient(circle at 80% 80%, #fde3e9 0%, transparent 40%);
-    font-family: 'Poppins', sans-serif;
-    position: relative;
-    overflow-x: hidden;
+/* ==========================================================================
+   Global Theme for Streamlit Attendance App
+   Author: Ashraf Salem
+   Responsive, Elegant, and Safe for Streamlit
+   ========================================================================== */
+
+/* ---------- Root Theme Variables ---------- */
+:root {
+  --primary: #2d3a8c;
+  --primary-hover: #1e2a6b;
+  --accent: #ff6b81;
+  --bg-top: #fde3eb;
+  --bg-bottom: #fffaf3;
+  --input-bg: #f4f5f7;
+  --input-border: #e0e0e0;
+  --radius: 10px;
+  --shadow: 0 4px 20px rgba(0,0,0,0.05);
+  --transition: all 0.3s ease;
+  --text-color: #333;
+  --font: 'Poppins', 'Segoe UI', sans-serif;
 }
 
-/* ==== شكل الموجة خلف الشعار ==== */
-.wave-bg {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 220px;
-    background: linear-gradient(135deg, #ffd7e1 0%, #fef0f0 100%);
-    border-bottom-left-radius: 60% 40%;
-    border-bottom-right-radius: 60% 40%;
-    z-index: 0;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+/* ---------- Layout Background ---------- */
+[data-testid="stAppViewContainer"] {
+  background: linear-gradient(to bottom, var(--bg-top), var(--bg-bottom));
+  font-family: var(--font);
+  color: var(--text-color);
+  padding-bottom: 80px;
 }
 
-
-/* ==== شعار علوي ==== */
-/* This targets the actual image if it's rendered by Streamlit */
-/* If you embed SVG directly, this might not apply, but your logo.svg is within a div */
-img {
-    filter: drop-shadow(0px 3px 5px rgba(0,0,0,0.1));
+[data-testid="stHeader"] {
+  background: transparent !important;
 }
 
-/* Target the div that contains your logo, assuming it's centered as in your Python code */
-div[data-testid="stMarkdown"] div[style*="text-align:center"] img {
-    margin-top: 40px;
-    margin-bottom: 10px;
+[data-testid="stSidebar"] {
+  background: rgba(255,255,255,0.7) !important;
+  backdrop-filter: blur(10px);
 }
 
-
-/* ==== الصندوق الرئيسي: استهدف الحاوية الفعلية لمحتوى Streamlit ==== */
-/* This targets the primary content block in Streamlit */
-.block-container {
-    background-color: #ffffff;
-    border-radius: 20px;
-    box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.08);
-    padding: 3rem 2.5rem;
-    width: 90%;
-    max-width: 480px;
-    margin: 3rem auto; /* This 'auto' margin centers it */
-    z-index: 1; /* Ensure it's above the wave background */
-    position: relative; /* Needed for z-index to work against fixed elements */
-}
-
-/* Override Streamlit's default padding to control your own margin */
-.css-1dp5x4l.e1g8pov61 { /* This is a common class for the overall app container */
-    padding: 0; /* Remove default padding to let .block-container manage its margin */
-}
-
-
-/* ==== العناوين ==== */
+/* ---------- Title and Headings ---------- */
 h1, h2, h3 {
+  font-weight: 700;
+  color: var(--primary);
+}
+
+h1::before {
+  content: '📝 ';
+}
+
+/* ---------- Streamlit Form Elements ---------- */
+input, textarea, select {
+  border-radius: var(--radius) !important;
+  background: var(--input-bg) !important;
+  border: 1px solid var(--input-border) !important;
+  padding: 10px 12px !important;
+  transition: var(--transition);
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none !important;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(45,58,140,0.15) !important;
+}
+
+/* ---------- Buttons ---------- */
+button, [data-testid="stButton"] button {
+  background: var(--primary) !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+  border-radius: var(--radius) !important;
+  border: none !important;
+  padding: 10px 20px !important;
+  box-shadow: var(--shadow) !important;
+  transition: var(--transition);
+}
+
+button:hover, [data-testid="stButton"] button:hover {
+  background: var(--primary-hover) !important;
+  transform: translateY(-1px);
+}
+
+/* ---------- Cards / Containers ---------- */
+section.main {
+  position: relative !important;
+  z-index: 1 !important;
+  margin: auto;
+  max-width: 600px;
+  background: rgba(255,255,255,0.85);
+  padding: 30px 40px;
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(5px);
+}
+
+/* ---------- Success & Error Messages ---------- */
+.stAlert {
+  border-radius: var(--radius) !important;
+  padding: 12px 18px !important;
+  box-shadow: var(--shadow);
+}
+
+/* ---------- Responsive Design ---------- */
+@media (max-width: 768px) {
+  section.main {
+    padding: 20px;
+    border-radius: 14px;
+  }
+  h1 {
+    font-size: 1.6rem !important;
     text-align: center;
-    color: #2e3b84;
-    font-weight: 700;
+  }
+  input, textarea, select {
+    font-size: 0.95rem !important;
+  }
+  button {
+    width: 100% !important;
+  }
 }
 
-/* ==== حقول الإدخال ==== */
-.stTextInput>div>div>input {
-    background-color: #f4f4f4;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    padding: 12px;
-    font-size: 16px;
+/* ---------- Floating Logo (Optional) ---------- */
+.logo {
+  display: block;
+  margin: 0 auto 20px auto;
+  width: 120px;
+  animation: fadeIn 1s ease forwards;
 }
 
-.stTextInput>div>label {
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 6px;
-    display: block;
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* ==== زر التسجيل ==== */
-.stButton>button {
-    background-color: #2e3fb4;
-    color: #fff;
-    font-weight: 600;
-    border: none;
-    border-radius: 10px;
-    padding: 12px;
-    font-size: 16px;
-    width: 100%;
-    transition: 0.3s ease;
+/* ---------- Animated Background Wave ---------- */
+body::before {
+  content: '';
+  position: fixed;
+  top: -100px;
+  left: 0;
+  width: 100%;
+  height: 400px;
+  background: radial-gradient(circle at 50% 0%, rgba(255,192,203,0.4), transparent);
+  border-radius: 50%;
+  z-index: 0;
+  animation: floatWave 6s ease-in-out infinite alternate;
 }
 
-.stButton>button:hover {
-    background-color: #1f2d80;
-    transform: translateY(-2px);
-}
-
-/* ==== الأيقونات ==== */
-.css-1kyxreq, .css-1q8dd3e { /* These are generic Streamlit icon classes, might change versions */
-    color: #2e3fb4;
-    font-size: 20px;
-}
-
-/* Specific target for Streamlit's internal icon for warnings, successes etc. */
-.stAlert .stAlertContent span[data-testid="stMarkdownContainer"] svg {
-    color: #2e3fb4; /* Apply primary color to warning/success icons */
-}
-
-/* ==== نصوص إضافية ==== */
-p, li, span {
-    color: #555;
-    font-size: 15px;
-}
-
-/* ==== الملاحظات أسفل النموذج ==== */
-hr {
-    border: none;
-    border-top: 1px solid #eee;
-    margin: 2rem 0;
+@keyframes floatWave {
+  from { transform: translateY(0); }
+  to { transform: translateY(15px); }
 }
