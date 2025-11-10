@@ -42,8 +42,8 @@ def get_registered_count():
 # -----------------------------------------------------
 # إعداد session_state
 # -----------------------------------------------------
-if "submitted" not in st.session_state:
-    st.session_state.submitted = False
+if "just_submitted" not in st.session_state:
+    st.session_state.just_submitted = False
 
 defaults = {
     "name": "",
@@ -91,7 +91,7 @@ country_codes = {
 }
 
 # -----------------------------------------------------
-# واجهة الإدخال
+# عناصر الفورم
 # -----------------------------------------------------
 name = st.text_input("الاسم الكامل", key="name")
 email = st.text_input("البريد الإلكتروني", key="email")
@@ -120,7 +120,7 @@ session = st.selectbox(
 )
 
 # -----------------------------------------------------
-# إرسال البيانات
+# دالة الإرسال إلى Google Sheet
 # -----------------------------------------------------
 def send_to_google_sheet(record: dict):
     try:
@@ -132,6 +132,8 @@ def send_to_google_sheet(record: dict):
 # -----------------------------------------------------
 # الزر + منطق الإرسال
 # -----------------------------------------------------
+success_message = st.empty()
+
 if st.button("تسجيل الحضور", use_container_width=True):
     if not st.session_state.name.strip() or not st.session_state.email.strip() or not st.session_state.phone_number.strip():
         st.warning("⚠️ الرجاء إدخال الاسم والبريد الإلكتروني ورقم الموبايل.")
@@ -147,19 +149,20 @@ if st.button("تسجيل الحضور", use_container_width=True):
         }
 
         if send_to_google_sheet(record):
-            st.session_state.submitted = True
-            st.experimental_rerun()
+            st.session_state.just_submitted = True
+            success_message.success("✅ تم تسجيل حضورك بنجاح!")
+            # تصفير القيم فورًا بدون ريفريش
+            for k, v in defaults.items():
+                st.session_state[k] = v
         else:
             st.error("⚠️ حدث خطأ أثناء الإرسال إلى Google Sheet.")
 
 # -----------------------------------------------------
-# عرض رسالة النجاح + تصفير القيم
+# رسالة النجاح
 # -----------------------------------------------------
-if st.session_state.submitted:
-    st.success("✅ تم تسجيل حضورك بنجاح!")
-    for k, v in defaults.items():
-        st.session_state[k] = v
-    st.session_state.submitted = False
+if st.session_state.just_submitted:
+    success_message.success("✅ تم تسجيل حضورك بنجاح!")
+    st.session_state.just_submitted = False
 
 # -----------------------------------------------------
 # ملاحظة أسفل الصفحة
