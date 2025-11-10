@@ -32,6 +32,8 @@ html, body, [data-testid="stAppViewContainer"] {
 .main {
     background: transparent !important; /* Ensure Streamlit's main area doesn't have its own background */
     padding-top: 0 !important; /* We will manage padding with specific elements */
+    padding-left: 1rem; /* Adjust default padding */
+    padding-right: 1rem; /* Adjust default padding */
 }
 
 /* Hide Streamlit header and footer if not needed */
@@ -71,10 +73,10 @@ html, body, [data-testid="stAppViewContainer"] {
 }
 
 /* --- CRUCIAL FOR WHITE BOX --- */
-/* Target the main Streamlit container that holds the content after the wave and logo */
-/* This will target the first stVerticalBlock after the initial page-level markdown elements */
-/* The main content that *should* be in the white box */
-.main > div:nth-child(1) > div:nth-child(1) > div:nth-child(1)[data-testid="stVerticalBlock"] {
+/* Target the stVerticalBlock that contains the main form content */
+/* We target a stVerticalBlock that is a direct descendant of .main */
+/* And importantly, we add margin-top to push it down below the wave and logo. */
+.main [data-testid="stVerticalBlock"] {
     background: rgba(255, 255, 255, 0.95);
     border-radius: 18px;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
@@ -87,7 +89,13 @@ html, body, [data-testid="stAppViewContainer"] {
     animation: fadeIn 0.8s ease both; /* Keep animation */
     position: relative;
     z-index: 1; /* Ensure it's above the wave */
-    margin-top: 160px !important; /* Push down to clear the wave and logo area */
+    margin-top: 160px; /* PUSH DOWN TO CLEAR THE WAVE AND LOGO AREA */
+}
+
+/* Override default padding within the stVerticalBlock so our padding takes effect */
+.main [data-testid="stVerticalBlock"] > div > div {
+    padding-top: 0px !important;
+    padding-bottom: 0px !important;
 }
 
 
@@ -150,8 +158,7 @@ p, span, div, label, small {
   padding-left: 0 !important;
 }
 
-/* Adjust for Streamlit's default margins/padding within its containers */
-/* This is a more general reset for internal blocks */
+/* Global reset for padding/margin on Streamlit's internal blocks */
 [data-testid="stVerticalBlock"] > div > div > div {
     padding: 0px !important;
     margin: 0px !important;
@@ -179,7 +186,7 @@ hr {
     width: 100% !important;
   }
   /* Adjust form container for smaller screens */
-  .main > div:nth-child(1) > div:nth-child(1) > div:nth-child(1)[data-testid="stVerticalBlock"] {
+  .main [data-testid="stVerticalBlock"] {
     padding: 25px 20px;
     margin: 20px 10px;
   }
