@@ -72,14 +72,15 @@ def validate_email(x: str) -> bool:
         return bool(email_re.match(x.strip()))
     return "@" in x.strip() and "." in x.strip()
 
-
 # -------- حاوية النموذج --------
 st.markdown("<div class='form-container'>", unsafe_allow_html=True)
 
+# -------- الحقول --------
 name  = st.text_input("الاسم الكامل", placeholder="اكتب اسمك هنا")
 phone = st.text_input("التليفون (مثال: +971501234567 أو 0501234567)")
 email = st.text_input("الإيميل", placeholder="example@email.com")
 
+# -------- زر التسجيل --------
 if st.button("سجّل الحضور ✅", use_container_width=True):
     if not name.strip() or not phone.strip() or not email.strip():
         st.warning("الرجاء إدخال جميع البيانات قبل التسجيل.")
