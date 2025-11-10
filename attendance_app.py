@@ -96,12 +96,12 @@ def send_to_google_sheet(record: dict) -> bool:
         return False
 
 # -----------------------------------------------------
-# دالة الإرسال وإعادة التعيين (Callback لـ st.button)
+# دالة الإرسال وإعادة التعيين (Callback)
 # -----------------------------------------------------
 def submit_and_reset_form():
     """
     تُرسل البيانات ثم تُعيد تعيين قيم session_state.
-    تُستدعى عبر on_click لتحديث الحالة بأمان.
+    تُستدعى الآن بعد الضغط على زر الإرسال.
     """
     # جلب القيم من session_state مباشرة
     name = st.session_state["name"].strip()
@@ -195,44 +195,50 @@ counter_html = f"""
 components.html(counter_html, height=60)
 
 # -----------------------------------------------------
-# واجهة الإدخال (تم إزالة debounce)
+# واجهة الإدخال (باستخدام st.form)
 # -----------------------------------------------------
-st.text_input("الاسم الكامل", key="name")
-st.text_input("البريد الإلكتروني", key="email")
+# استخدام st.form يمنع إعادة الرسم الكاملة أثناء الكتابة، مما يحل مشكلة الوميض
+with st.form(key='attendance_form'):
+    st.text_input("الاسم الكامل", key="name")
+    st.text_input("البريد الإلكتروني", key="email")
 
-col_code, col_phone = st.columns([1, 2])
-with col_code:
+    col_code, col_phone = st.columns([1, 2])
+    with col_code:
+        st.selectbox(
+            "كود الدولة", list(country_codes.keys()), index=0, key="selected_country"
+        )
+    with col_phone:
+        st.text_input("رقم الموبايل", placeholder="5xxxxxxxx", key="phone_number")
+
     st.selectbox(
-        "كود الدولة", list(country_codes.keys()), index=0, key="selected_country"
+        "اختر الماستر كلاس",
+        [
+            "كيف تتحقق من الأخبار باستخدام الذكاء الاصطناعي - فهمي متولي",
+            "كتابة المحتوى للسوشيال ميديا - أشرف سالم",
+            "كتابة وصياغة الأخبار للسوشيال ميديا - محمد عواد",
+            "تصحيح مفاهيم التسويق الرقمي - يحيى نايل",
+        ],
+        key="masterclass"
     )
-with col_phone:
-    st.text_input("رقم الموبايل", placeholder="5xxxxxxxx", key="phone_number")
 
-st.selectbox(
-    "اختر الماستر كلاس",
-    [
-        "كيف تتحقق من الأخبار باستخدام الذكاء الاصطناعي - فهمي متولي",
-        "كتابة المحتوى للسوشيال ميديا - أشرف سالم",
-        "كتابة وصياغة الأخبار للسوشيال ميديا - محمد عواد",
-        "تصحيح مفاهيم التسويق الرقمي - يحيى نايل",
-    ],
-    key="masterclass"
-)
-
-st.selectbox(
-    "اختر اليوم / الجلسة",
-    ["اليوم الأول", "اليوم الثاني", "اليوم الثالث"],
-    key="session"
-)
+    st.selectbox(
+        "اختر اليوم / الجلسة",
+        ["اليوم الأول", "اليوم الثاني", "اليوم الثالث"],
+        key="session"
+    )
+    
+    # زر الإرسال الخاص بالنموذج
+    submit_button = st.form_submit_button(
+        "تسجيل الحضور", 
+        use_container_width=True
+    )
 
 # -----------------------------------------------------
-# زر التسجيل (باستخدام on_click)
+# معالجة الإرسال (تحدث بعد إعادة الرسم)
 # -----------------------------------------------------
-st.button(
-    "تسجيل الحضور", 
-    use_container_width=True, 
-    on_click=submit_and_reset_form
-)
+if submit_button:
+    # سيتم تنفيذ دالة الإرسال وإعادة التعيين عند الضغط على الزر
+    submit_and_reset_form()
 
 # -----------------------------------------------------
 # عرض رسالة الحالة بعد الإرسال
