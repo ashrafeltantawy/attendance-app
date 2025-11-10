@@ -2,6 +2,7 @@
    Global Theme for Streamlit Attendance App
    Author: Ashraf Salem
    Responsive, Elegant, and Safe for Streamlit
+   (REFACTORED FOR SIMPLICITY)
    ========================================================================== */
 /* ---------- Google Font: Tajawal ---------- */
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap');
@@ -72,30 +73,27 @@ html, body, [data-testid="stAppViewContainer"] {
     display: block; /* Ensure SVG is block within its wrapper for centering */
 }
 
-/* --- CRUCIAL FOR WHITE BOX --- */
-/* Target the stVerticalBlock that contains the main form content */
-/* We target a stVerticalBlock that is a direct descendant of .main */
-/* And importantly, we add margin-top to push it down below the wave and logo. */
-.main [data-testid="stVerticalBlock"] {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 18px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-    padding: 40px 30px;
-    margin: 40px auto; /* Centered with auto margins */
-    max-width: 500px;
-    backdrop-filter: blur(6px);
-    direction: rtl;
-    text-align: right;
-    animation: fadeIn 0.8s ease both; /* Keep animation */
-    position: relative;
-    z-index: 1; /* Ensure it's above the wave */
-    margin-top: 160px; /* PUSH DOWN TO CLEAR THE WAVE AND LOGO AREA */
+/* --- (SIMPLIFIED) WHITE FORM CONTAINER --- */
+/* This is now the *only* rule for the white box */
+.form-box {
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  padding: 45px 35px;
+  /* This margin pushes it down from the logo (160px) and centers it (auto) */
+  margin: 160px auto 60px auto; 
+  max-width: 560px;
+  backdrop-filter: blur(6px);
+  direction: rtl;
+  text-align: right;
+  animation: fadeIn 0.8s ease both;
+  position: relative;
+  z-index: 2; /* Above wave, below logo if it overlaps */
 }
 
-/* Override default padding within the stVerticalBlock so our padding takes effect */
-.main [data-testid="stVerticalBlock"] > div > div {
-    padding-top: 0px !important;
-    padding-bottom: 0px !important;
+.form-box h1, .form-box h2, .form-box h3, .form-box label, .form-box p {
+  text-align: right !important;
+  direction: rtl !important;
 }
 
 
@@ -135,6 +133,7 @@ p, span, div, label, small {
   border: none;
   transition: all 0.3s ease-in-out;
   box-shadow: 0 4px 12px rgba(58, 12, 163, 0.15);
+  width: 100%; /* Make buttons full width by default */
 }
 
 .stButton > button:hover {
@@ -182,13 +181,12 @@ hr {
   input, textarea, select {
     font-size: 0.95rem !important;
   }
-  button {
-    width: 100% !important;
-  }
-  /* Adjust form container for smaller screens */
-  .main [data-testid="stVerticalBlock"] {
+  
+  /* Make the form box responsive */
+  .form-box {
     padding: 25px 20px;
-    margin: 20px 10px;
+    /* Adjust margin: 120px top (less for mobile), 10px sides, 20px bottom */
+    margin: 120px 10px 20px 10px; 
   }
 }
 
@@ -196,30 +194,4 @@ hr {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
-}
-
-/* ---------- White Form Container (explicit) ---------- */
-.form-box {
-  background: rgba(255, 255, 255, 0.96);
-  border-radius: 20px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-  padding: 45px 35px;
-  margin: 60px auto;
-  max-width: 560px;
-  backdrop-filter: blur(6px);
-  direction: rtl;
-  text-align: right;
-  animation: fadeIn 0.8s ease both;
-  position: relative;
-  z-index: 2;
-}
-
-.form-box h1, .form-box h2, .form-box h3, .form-box label, .form-box p {
-  text-align: right !important;
-  direction: rtl !important;
-}
-
-/* Make Streamlit buttons full width inside columns */
-.stButton > button {
-  width: 100%;
 }
