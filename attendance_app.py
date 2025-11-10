@@ -20,10 +20,9 @@ def load_css():
             with open(path, "r", encoding="utf-8") as f:
                 st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
         except FileNotFoundError:
-            continue
+            pass # Continue if file not found
     
     # CSS Fix for flickering/opacity changes during reruns
-    # هذا الكود يثبت الأوباسيتي ويزيل الانتقالات المسببة للوميض
     stability_css = """
     <style>
     .stApp {
@@ -101,9 +100,9 @@ def send_to_google_sheet(record: dict) -> bool:
 def submit_and_reset_form():
     """
     تُرسل البيانات ثم تُعيد تعيين قيم session_state.
-    تُستدعى الآن بعد الضغط على زر الإرسال.
+    تُستدعى عبر on_click لتحديث الحالة بأمان.
     """
-    # جلب القيم من session_state مباشرة
+    # جلب القيم من session_state مباشرة (التي تم تحديثها بواسطة النموذج)
     name = st.session_state["name"].strip()
     email = st.session_state["email"].strip()
     phone_number = st.session_state["phone_number"].strip()
@@ -131,7 +130,7 @@ def submit_and_reset_form():
     if send_to_google_sheet(payload):
         st.session_state["submission_status"] = "success"
         
-        # تفريغ الحقول النصية والقيم الأخرى
+        # تفريغ الحقول النصية والقيم الأخرى (هذه الخطوة آمنة الآن)
         st.session_state["name"] = ""
         st.session_state["email"] = ""
         st.session_state["phone_number"] = ""
@@ -197,7 +196,7 @@ components.html(counter_html, height=60)
 # -----------------------------------------------------
 # واجهة الإدخال (باستخدام st.form)
 # -----------------------------------------------------
-# استخدام st.form يمنع إعادة الرسم الكاملة أثناء الكتابة، مما يحل مشكلة الوميض
+# استخدام st.form يمنع إعادة الرسم الكاملة أثناء الكتابة (يحل مشكلة الوميض)
 with st.form(key='attendance_form'):
     st.text_input("الاسم الكامل", key="name")
     st.text_input("البريد الإلكتروني", key="email")
@@ -227,22 +226,17 @@ with st.form(key='attendance_form'):
         key="session"
     )
     
-    # زر الإرسال الخاص بالنموذج
-    submit_button = st.form_submit_button(
+    # الزر الآن يستخدم on_click مباشرة لإرسال البيانات وتفريغ الحقول بأمان
+    st.form_submit_button(
         "تسجيل الحضور", 
-        use_container_width=True
+        use_container_width=True,
+        on_click=submit_and_reset_form # ⬅️ هذا يحل مشكلة الـ StreamlitAPIException
     )
-
-# -----------------------------------------------------
-# معالجة الإرسال (تحدث بعد إعادة الرسم)
-# -----------------------------------------------------
-if submit_button:
-    # سيتم تنفيذ دالة الإرسال وإعادة التعيين عند الضغط على الزر
-    submit_and_reset_form()
 
 # -----------------------------------------------------
 # عرض رسالة الحالة بعد الإرسال
 # -----------------------------------------------------
+# يتم عرض الرسالة بعد اكتمال إعادة الرسم الناتجة عن الـ on_click
 status = st.session_state["submission_status"]
 
 if status == "success":
