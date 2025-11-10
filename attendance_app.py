@@ -24,7 +24,7 @@ load_css()
 # -----------------------------------------------------
 # رابط Google Apps Script (استبدله برابطك)
 # -----------------------------------------------------
-GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbxxxxxxxxxxxxxxxxxxxx/exec"
+GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbz3hXsAawAMpu4LPj26-xntDvGWutZdjwl4dS-o570jKedIGRvyEizljrO5TvOMUCSt0Q/exec"
 
 # -----------------------------------------------------
 # شعار علوي
