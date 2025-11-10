@@ -7,7 +7,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap');
 
 /* ---------- Global RTL & Font Settings ---------- */
-html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
+html, body, [data-testid="stAppViewContainer"] {
   direction: rtl;
   text-align: right;
   font-family: 'Tajawal', sans-serif !important;
@@ -19,18 +19,23 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
     #fff5dc 60%,  /* warm cream */
     #ffd59e 100%  /* orange-peach gradient end */
   ) !important; /* !important to override Streamlit defaults */
+  padding-bottom: 80px; /* Space at the bottom */
 }
 
-/* Adjust Streamlit's main content area background */
+/* Ensure Streamlit's main app view takes full width and positions content */
+[data-testid="stAppViewContainer"] {
+    position: relative; /* For absolute positioning of wave-bg */
+    overflow-x: hidden; /* Prevent horizontal scroll from wave */
+}
+
+/* Adjust Streamlit's main content area background and padding */
 .main {
     background: transparent !important; /* Ensure Streamlit's main area doesn't have its own background */
+    padding-top: 0 !important; /* We will manage padding with a wrapper */
 }
 
 /* Hide Streamlit header and footer if not needed */
-[data-testid="stHeader"] {
-    display: none !important;
-}
-[data-testid="stToolbar"] { /* For Streamlit Cloud's footer */
+[data-testid="stHeader"], [data-testid="stToolbar"] {
     display: none !important;
 }
 
@@ -41,17 +46,20 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
   left: 0;
   width: 100%;
   height: 180px; /* Adjust height as needed */
-  background: url('https://raw.githubusercontent.com/streamlit/docs/main/docs/images/wave-example.svg') no-repeat center bottom; /* Example wave SVG, replace with your actual wave SVG or CSS */
-  background-size: cover; /* or contain, depending on your SVG */
+  /* This is a placeholder URL. Replace with your actual wave SVG background */
+  background: url('https://raw.githubusercontent.com/streamlit/docs/main/docs/images/wave-example.svg') no-repeat center bottom;
+  background-size: cover;
   z-index: 0; /* Ensure it's behind content */
 }
 
 /* This creates space at the top so content doesn't overlap the wave */
-[data-testid="stAppViewContainer"] > .main {
-  padding-top: 180px !important; /* Match wave-bg height + some extra space */
-  position: relative;
+/* We target the main content block directly */
+[data-testid="stVerticalBlock"] > div:first-child {
+  margin-top: 160px; /* This pushes the first content block down */
+  position: relative; /* Ensure it respects z-index */
   z-index: 1; /* Ensure content is above wave */
 }
+
 
 /* ---------- Typography ---------- */
 h1, h2 {
@@ -76,9 +84,8 @@ p, span, div, label, small {
   line-height: 1.6;
 }
 
-/* ---------- Form Container Wrapper (the white box) ---------- */
-/* This will now style the wrapper div that *contains* Streamlit components */
-.st-form-container-wrapper {
+/* ---------- Main Form Content Wrapper (the white box) ---------- */
+.main-form-content {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 18px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
@@ -92,7 +99,7 @@ p, span, div, label, small {
 }
 
 @media (max-width: 600px) {
-  .st-form-container-wrapper {
+  .main-form-content {
     padding: 25px 20px;
     margin: 20px 10px;
   }
@@ -135,7 +142,6 @@ p, span, div, label, small {
 }
 
 /* ---------- Logo Styling ---------- */
-/* This styles the wrapper div containing the inline SVG logo */
 .logo-wrapper {
     text-align: center;
     margin-bottom: 10px;
@@ -144,6 +150,8 @@ p, span, div, label, small {
     display: block; /* Make it a block element to center */
     margin-left: auto;
     margin-right: auto;
+    position: relative; /* For z-index to work against wave */
+    z-index: 2; /* Ensure logo is above everything */
 }
 .logo-wrapper svg {
     max-width: 100%;
@@ -151,11 +159,18 @@ p, span, div, label, small {
     display: block; /* Ensure SVG is block within its wrapper for centering */
 }
 
-
 /* Adjust for Streamlit's default margins within its containers */
-/* This targets the internal divs that Streamlit uses to wrap components */
-.stVerticalBlock > div > div > div:not(.st-form-container-wrapper) {
-    padding: 0px !important; /* Remove default padding in Streamlit blocks if needed */
+/* Target specific nested divs to remove unwanted padding/margins */
+[data-testid="stVerticalBlock"] > div > div > div:not(.main-form-content) {
+    padding: 0px !important;
+    margin: 0px !important;
+}
+
+/* Small adjustment for the markdown horizontal rule */
+hr {
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    border-top: 1px solid rgba(0,0,0,0.1);
 }
 
 
@@ -178,5 +193,3 @@ p, span, div, label, small {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
-/* The animation is now on .st-form-container-wrapper */
