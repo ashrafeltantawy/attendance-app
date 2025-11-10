@@ -28,24 +28,27 @@ try:
 except Exception as e:
     st.error(f"Error loading CSS: {e}")
 
-# -------- خلفية موجية + مسافة فوق المحتوى --------
-st.markdown("""
-    <div class='wave-bg'></div>
-    <div style='height:120px'></div>
-""", unsafe_allow_html=True)
+# -------- خلفية موجية --------
+# This div will be styled by .wave-bg in CSS
+st.markdown("<div class='wave-bg'></div>", unsafe_allow_html=True)
 
 # -------- الشعار (Inline SVG لضمان الظهور على Streamlit Cloud) --------
 logo_path = STATIC_DIR / "logo.svg"
 if logo_path.exists():
     try:
         svg = logo_path.read_text(encoding="utf-8")
-        st.markdown(f"<div style='text-align:center;margin-bottom:10px'>{svg}</div>", unsafe_allow_html=True)
+        # Wrap the SVG in a div that can be styled by the logo-wrapper CSS
+        st.markdown(f"<div class='logo-wrapper'>{svg}</div>", unsafe_allow_html=True)
     except Exception as e:
         st.error(f"Error loading logo SVG: {e}")
 else:
     st.warning("`static/logo.svg` not found. Running without logo.")
 
-# -------- عنوان ووصف --------
+# -------- حاوية النموذج (the white box that wraps everything below) --------
+# This is the main container for your form elements
+st.markdown('<div class="st-form-container-wrapper">', unsafe_allow_html=True)
+
+# -------- عنوان ووصف (NOW INSIDE THE WHITE BOX) --------
 st.title("📝 نموذج حضور – تسجيل البيانات")
 st.write("املأ البيانات التالية. النموذج متجاوب ويعمل باللمس على الأجهزة المحمولة.")
 
@@ -72,50 +75,46 @@ def validate_email(x: str) -> bool:
         return bool(email_re.match(x.strip()))
     return "@" in x.strip() and "." in x.strip()
 
-# -------- حاوية النموذج (using st.container and targeting it with CSS) --------
-# We'll add a custom ID or use a data-testid to target this container in CSS
-with st.container(border=False) as form_container_widget: # Use a key to potentially target it later if needed
-    st.markdown('<div class="st-form-container-wrapper">', unsafe_allow_html=True) # A div to hold the form-container styling
-    
-    name  = st.text_input("الاسم الكامل", placeholder="اكتب اسمك هنا")
-    phone = st.text_input("التليفون (مثال: +971501234567 أو 0501234567)")
-    email = st.text_input("الإيميل", placeholder="example@email.com")
+# -------- Form Fields --------
+name  = st.text_input("الاسم الكامل", placeholder="اكتب اسمك هنا")
+phone = st.text_input("التليفون (مثال: +971501234567 أو 0501234567)")
+email = st.text_input("الإيميل", placeholder="example@email.com")
 
-    if st.button("سجّل الحضور ✅", use_container_width=True):
-        if not name.strip() or not phone.strip() or not email.strip():
-            st.warning("الرجاء إدخال جميع البيانات قبل التسجيل.")
-        elif not validate_phone(phone):
-            st.warning("صيغة رقم الهاتف غير صحيحة.")
-        elif not validate_email(email):
-            st.warning("صيغة البريد الإلكتروني غير صحيحة.")
-        else:
-            try:
-                df_old = pd.read_excel(DATA_FILE) if DATA_FILE.exists() else pd.DataFrame(
-                    columns=["الاسم الكامل", "التليفون", "الإيميل", "الوقت"]
-                )
-                new_row = {
-                    "الاسم الكامل": name.strip(),
-                    "التليفون": phone.strip(),
-                    "الإيميل": email.strip(),
-                    "الوقت": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                }
-                df_new = pd.concat([df_old, pd.DataFrame([new_row])], ignore_index=True)
-                df_new.to_excel(DATA_FILE, index=False)
-                st.success("تم تسجيل حضورك بنجاح 🎉")
-            except Exception as e:
-                st.error(f"حدث خطأ أثناء حفظ البيانات: {e}")
-
-    if DATA_FILE.exists():
-        with open(DATA_FILE, "rb") as fh:
-            st.download_button(
-                "⬇️ تحميل قاعدة البيانات",
-                data=fh,
-                file_name="attendance.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                use_container_width=True,
+if st.button("سجّل الحضور ✅", use_container_width=True):
+    if not name.strip() or not phone.strip() or not email.strip():
+        st.warning("الرجاء إدخال جميع البيانات قبل التسجيل.")
+    elif not validate_phone(phone):
+        st.warning("صيغة رقم الهاتف غير صحيحة.")
+    elif not validate_email(email):
+        st.warning("صيغة البريد الإلكتروني غير صحيحة.")
+    else:
+        try:
+            df_old = pd.read_excel(DATA_FILE) if DATA_FILE.exists() else pd.DataFrame(
+                columns=["الاسم الكامل", "التليفون", "الإيميل", "الوقت"]
             )
-    st.markdown('</div>', unsafe_allow_html=True) # Close the wrapper
-    
+            new_row = {
+                "الاسم الكامل": name.strip(),
+                "التليفون": phone.strip(),
+                "الإيميل": email.strip(),
+                "الوقت": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            }
+            df_new = pd.concat([df_old, pd.DataFrame([new_row])], ignore_index=True)
+            df_new.to_excel(DATA_FILE, index=False)
+            st.success("تم تسجيل حضورك بنجاح 🎉")
+        except Exception as e:
+            st.error(f"حدث خطأ أثناء حفظ البيانات: {e}")
+
+if DATA_FILE.exists():
+    with open(DATA_FILE, "rb") as fh:
+        st.download_button(
+            "⬇️ تحميل قاعدة البيانات",
+            data=fh,
+            file_name="attendance.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            use_container_width=True,
+        )
+
+st.markdown('</div>', unsafe_allow_html=True) # Close the st-form-container-wrapper
 
 # -------- فاصل وملاحظات --------
 st.markdown("---")
