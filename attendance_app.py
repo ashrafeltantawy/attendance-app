@@ -19,7 +19,6 @@ def load_css():
         try:
             with open(path, "r", encoding="utf-8") as f:
                 st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-                # لا نستخدم return هنا لنسمح بالكود التالي بالعمل
         except FileNotFoundError:
             continue
     
@@ -196,11 +195,10 @@ counter_html = f"""
 components.html(counter_html, height=60)
 
 # -----------------------------------------------------
-# واجهة الإدخال (مع debounce=500)
+# واجهة الإدخال (تم إزالة debounce)
 # -----------------------------------------------------
-# إضافة debounce=500 لتقليل مرات إعادة الرسم أثناء الكتابة
-st.text_input("الاسم الكامل", key="name", debounce=500)
-st.text_input("البريد الإلكتروني", key="email", debounce=500)
+st.text_input("الاسم الكامل", key="name")
+st.text_input("البريد الإلكتروني", key="email")
 
 col_code, col_phone = st.columns([1, 2])
 with col_code:
@@ -208,7 +206,7 @@ with col_code:
         "كود الدولة", list(country_codes.keys()), index=0, key="selected_country"
     )
 with col_phone:
-    st.text_input("رقم الموبايل", placeholder="5xxxxxxxx", key="phone_number", debounce=500)
+    st.text_input("رقم الموبايل", placeholder="5xxxxxxxx", key="phone_number")
 
 st.selectbox(
     "اختر الماستر كلاس",
