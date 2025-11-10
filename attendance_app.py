@@ -110,11 +110,70 @@ with col_submit:
 with col_clear:
     clear = st.button("تفريغ الحقول", use_container_width=True)
 
+# 🛑 التصحيح: استبدال st.experimental_rerun() بـ st.rerun()
 if clear:
-    # لإعادة تحميل الصفحة ومسح جميع الحقول
-    st.experimental_rerun()
+    st.rerun()
 
 if submit:
     # التحقق من المدخلات الأساسية
     if not name.strip() or not email.strip() or not phone_number.strip():
-        st.warning
+        st.warning("⚠️ الرجاء إدخال الاسم والبريد الإلكتروني ورقم الهاتف.")
+    else:
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        rec = {
+            "timestamp": timestamp,
+            "name": name.strip(),
+            "email": email.strip(),
+            "masterclass": masterclass,
+            "session": session,
+            # حفظ الكود (أول جزء قبل المسافة)
+            "phone_code": phone_code.split(' ')[0], 
+            "phone_number": phone_number.strip(),
+        }
+        try:
+            append_record(rec)
+            st.success(f"✅ تم تسجيل حضورك بنجاح في «{masterclass}». شكرًا يا {name}!")
+        except Exception as e:
+            st.error(f"حدث خطأ أثناء حفظ البيانات: {e}")
+
+
+# --------------------------- Data Preview & Export -----------------
+st.markdown("### 🗂️ سجلات اليوم (آخر المدخلات)")
+df_all = load_data()
+df_today = get_today_data(df_all)
+
+if df_today.empty:
+    st.info("لا توجد سجلات لليوم حتى الآن.")
+else:
+    # عرض البيانات بترتيب عكسي (الأحدث أولاً)
+    st.dataframe(df_today[::-1], use_container_width=True, hide_index=True)
+
+# أزرار التصدير
+col1, col2 = st.columns(2)
+
+with col1:
+    csv_bytes = df_all.to_csv(index=False).encode("utf-8")
+    st.download_button(
+        label="⬇️ تنزيل CSV كامل",
+        data=csv_bytes,
+        file_name="attendance_data.csv",
+        mime="text/csv",
+        use_container_width=True
+    )
+
+with col2:
+    try:
+        import io
+        from pandas import ExcelWriter
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
+            df_all.to_excel(writer, sheet_name="Attendance", index=False)
+        st.download_button(
+            label="⬇️ تنزيل Excel كامل",
+            data=output.getvalue(),
+            file_name="attendance_data.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            use_container_width=True
+        )
+    except Exception as e:
+        st.caption(f"تعذّر إنشاء ملف Excel ({e}). يرجى تنزيل CSV.")
