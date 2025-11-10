@@ -24,7 +24,7 @@ load_css()
 # -----------------------------------------------------
 # رابط Google Apps Script (استبدله برابطك)
 # -----------------------------------------------------
-GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbwhZixCLKXVdp0mKl43_wUDbG4ggFrqE4uk68HhbhClEkZGIcg4m-UDMXFdeu4EWrtGmg/exec"
+GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzKySe0rBZxNMTc8FU9yWl_b3uo054sKQkii6kvHK1DSuCpn1soRbp8mFWEdt7BjArhJw/exec"
 
 # -----------------------------------------------------
 # واجهة التسجيل
