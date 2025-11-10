@@ -1,5 +1,6 @@
 import streamlit as st
 import requests
+import time
 from datetime import datetime
 
 # -----------------------------------------------------
@@ -22,7 +23,7 @@ def load_css():
 load_css()
 
 # -----------------------------------------------------
-# رابط Google Apps Script (استبدله برابطك)
+# رابط Google Apps Script (استبدله برابطك الفعلي)
 # -----------------------------------------------------
 GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbz3hXsAawAMpu4LPj26-xntDvGWutZdjwl4dS-o570jKedIGRvyEizljrO5TvOMUCSt0Q/exec"
 
@@ -45,7 +46,6 @@ defaults = {
     "phone_number": "",
     "masterclass": "كتابة المحتوى للسوشيال ميديا - أشرف سالم",
     "session": "اليوم الأول",
-    "submitted": False,
 }
 for k, v in defaults.items():
     st.session_state.setdefault(k, v)
@@ -88,12 +88,17 @@ masterclass = st.selectbox(
     key="masterclass"
 )
 
-session = st.selectbox("اختر اليوم / الجلسة", ["اليوم الأول", "اليوم الثاني", "اليوم الثالث"], key="session")
+session = st.selectbox(
+    "اختر اليوم / الجلسة",
+    ["اليوم الأول", "اليوم الثاني", "اليوم الثالث"],
+    key="session"
+)
 
 # -----------------------------------------------------
-# إرسال البيانات إلى Google Sheet
+# دالة الإرسال إلى Google Sheet
 # -----------------------------------------------------
 def send_to_google_sheet(record: dict):
+    """يرسل البيانات إلى Google Sheet عبر API."""
     try:
         response = requests.post(GOOGLE_SHEET_URL, json=record)
         return response.status_code == 200
@@ -109,7 +114,7 @@ if st.button("تسجيل الحضور", use_container_width=True):
     elif GOOGLE_SHEET_URL.startswith("https://script.google.com/macros/s/AKfycbxxxxxxxx"):
         st.warning("⚠️ الرجاء استبدال رابط GOOGLE_SHEET_URL بالرابط الصحيح من Google Apps Script.")
     else:
-        full_phone = f"{country_codes[selected_country]} {st.session_state.phone_number.strip()}"
+        full_phone = f"{country_codes[st.session_state.selected_country]} {st.session_state.phone_number.strip()}"
         record = {
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "name": st.session_state.name.strip(),
@@ -120,23 +125,22 @@ if st.button("تسجيل الحضور", use_container_width=True):
         }
 
         if send_to_google_sheet(record):
-            st.session_state.submitted = True
-            # تفريغ الحقول
-            st.session_state.name = ""
-            st.session_state.email = ""
-            st.session_state.phone_number = ""
-            st.session_state.selected_country = "🇦🇪 الإمارات"
-            st.session_state.masterclass = "كتابة المحتوى للسوشيال ميديا - أشرف سالم"
-            st.session_state.session = "اليوم الأول"
+            st.success("✅ تم تسجيل حضورك بنجاح!")
+            # نحط علامة لتصفير الحقول لاحقًا
+            st.session_state["clear_form"] = True
+            st.stop()
         else:
             st.error("⚠️ حدث خطأ أثناء الإرسال إلى Google Sheet.")
 
 # -----------------------------------------------------
-# رسالة النجاح
+# تصفير الحقول بعد التسجيل الناجح (بعد ثانيتين)
 # -----------------------------------------------------
-if st.session_state.submitted:
-    st.success("✅ تم تسجيل حضورك بنجاح!")
-    st.session_state.submitted = False
+if "clear_form" in st.session_state and st.session_state["clear_form"]:
+    time.sleep(2)  # انتظر ثانيتين بعد الرسالة
+    for key, value in defaults.items():
+        st.session_state[key] = value
+    st.session_state["clear_form"] = False
+    st.rerun()
 
 # -----------------------------------------------------
 # ملاحظة أسفل الصفحة
