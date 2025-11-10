@@ -79,15 +79,15 @@ def send_to_google_sheet(record: dict):
     """يرسل البيانات إلى Google Sheet عبر API."""
     try:
         response = requests.post(GOOGLE_SHEET_URL, json=record)
-  if response.status_code == 200:
-    st.success(f"✅ تم تسجيل حضورك بنجاح في «{record['masterclass']}».")
-    # بعد التسجيل الناجح، أعد تحميل الصفحة لتفريغ الحقول
-    st.experimental_rerun()
-
+        if response.status_code == 200:
+            st.success(f"✅ تم تسجيل حضورك بنجاح في «{record['masterclass']}».")
+            # إعادة تحميل الصفحة بعد التسجيل الناجح لتفريغ الحقول
+            st.experimental_rerun()
         else:
             st.error("⚠️ حدث خطأ أثناء الإرسال إلى Google Sheet.")
     except Exception as e:
         st.error(f"❌ لم يتمكن التطبيق من الاتصال: {e}")
+
 
 # -----------------------------------------------------
 # أزرار التحكم
