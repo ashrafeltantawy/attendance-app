@@ -24,10 +24,10 @@ load_css()
 # -----------------------------------------------------
 # رابط Google Apps Script (استبدله برابطك)
 # -----------------------------------------------------
-GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzKySe0rBZxNMTc8FU9yWl_b3uo054sKQkii6kvHK1DSuCpn1soRbp8mFWEdt7BjArhJw/exec"
+GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbxxxxxxxxxxxxxxxxxxxx/exec"
 
 # -----------------------------------------------------
-# واجهة التسجيل
+# شعار علوي
 # -----------------------------------------------------
 st.markdown(
     '<div class="form-logo-wrapper"><svg viewBox="0 0 512 512"><circle cx="256" cy="256" r="200" fill="#f0f0f0"/><text x="50%" y="53%" text-anchor="middle" font-size="140" font-family="sans-serif">📝</text></svg></div>',
@@ -36,29 +36,46 @@ st.markdown(
 st.header("📋 تسجيل حضور الماستر كلاس")
 
 # -----------------------------------------------------
-# بيانات الفورم
+# إعداد session_state للفورم
 # -----------------------------------------------------
-name = st.text_input("الاسم الكامل")
-email = st.text_input("البريد الإلكتروني")
-
-# ✅ قائمة الدول (ابدأ بالإمارات)
-country_codes = {
-    "🇦🇪 الإمارات": "00971",
-    "🇸🇦 السعودية": "00966",
-    "🇪🇬 مصر": "0020",
-    "🇶🇦 قطر": "00974",
-    "🇰🇼 الكويت": "00965",
-    "🇧🇭 البحرين": "00973",
-    "🇴🇲 عمان": "00968",
-    "🇯🇴 الأردن": "00962",
-    "🇱🇧 لبنان": "00961"
+defaults = {
+    "name": "",
+    "email": "",
+    "selected_country": "🇦🇪 الإمارات",
+    "phone_number": "",
+    "masterclass": "كتابة المحتوى للسوشيال ميديا - أشرف سالم",
+    "session": "اليوم الأول",
+    "submitted": False,
 }
+for k, v in defaults.items():
+    st.session_state.setdefault(k, v)
+
+# -----------------------------------------------------
+# قائمة أكواد الدول
+# -----------------------------------------------------
+country_codes = {
+    "🇦🇪 الإمارات": "+971",
+    "🇸🇦 السعودية": "+966",
+    "🇪🇬 مصر": "+20",
+    "🇶🇦 قطر": "+974",
+    "🇰🇼 الكويت": "+965",
+    "🇧🇭 البحرين": "+973",
+    "🇴🇲 عمان": "+968",
+    "🇯🇴 الأردن": "+962",
+    "🇱🇧 لبنان": "+961"
+}
+
+# -----------------------------------------------------
+# عناصر الفورم
+# -----------------------------------------------------
+name = st.text_input("الاسم الكامل", key="name")
+email = st.text_input("البريد الإلكتروني", key="email")
 
 col_code, col_phone = st.columns([1, 2])
 with col_code:
-    selected_country = st.selectbox("كود الدولة", list(country_codes.keys()), index=0)
+    selected_country = st.selectbox("كود الدولة", list(country_codes.keys()), index=0, key="selected_country")
 with col_phone:
-    phone_number = st.text_input("رقم الموبايل", placeholder="5xxxxxxxx")
+    phone_number = st.text_input("رقم الموبايل", placeholder="5xxxxxxxx", key="phone_number")
 
 masterclass = st.selectbox(
     "اختر الماستر كلاس",
@@ -67,63 +84,62 @@ masterclass = st.selectbox(
         "كتابة المحتوى للسوشيال ميديا - أشرف سالم",
         "كتابة وصياغة الأخبار للسوشيال ميديا - محمد عواد",
         "تصحيح مفاهيم التسويق الرقمي - يحيى نايل",
-    ]
+    ],
+    key="masterclass"
 )
 
-session = st.selectbox("اختر اليوم / الجلسة", ["اليوم الأول", "اليوم الثاني", "اليوم الثالث"])
+session = st.selectbox("اختر اليوم / الجلسة", ["اليوم الأول", "اليوم الثاني", "اليوم الثالث"], key="session")
 
 # -----------------------------------------------------
 # إرسال البيانات إلى Google Sheet
 # -----------------------------------------------------
 def send_to_google_sheet(record: dict):
-    """يرسل البيانات إلى Google Sheet عبر API."""
     try:
         response = requests.post(GOOGLE_SHEET_URL, json=record)
-        if response.status_code == 200:
-            st.success(f"✅ تم تسجيل حضورك بنجاح في «{record['masterclass']}».")
-            # إعادة تحميل الصفحة لتفريغ الحقول بعد التسجيل الناجح
-            st.rerun()
-        else:
-            st.error("⚠️ حدث خطأ أثناء الإرسال إلى Google Sheet.")
-    except Exception as e:
-        st.error(f"❌ لم يتمكن التطبيق من الاتصال: {e}")
-
-
+        return response.status_code == 200
+    except Exception:
+        return False
 
 # -----------------------------------------------------
-# أزرار التحكم
+# زر التسجيل
 # -----------------------------------------------------
-col_submit, col_clear = st.columns([2, 1], gap="small")
-with col_submit:
-    submit = st.button("تسجيل الحضور", use_container_width=True)
-with col_clear:
-    clear = st.button("تفريغ الحقول", use_container_width=True)
-
-if clear:
-    st.experimental_rerun()
-
-# -----------------------------------------------------
-# عند الضغط على زر التسجيل
-# -----------------------------------------------------
-if submit:
-    if not name.strip() or not email.strip() or not phone_number.strip():
+if st.button("تسجيل الحضور", use_container_width=True):
+    if not st.session_state.name.strip() or not st.session_state.email.strip() or not st.session_state.phone_number.strip():
         st.warning("⚠️ الرجاء إدخال الاسم والبريد الإلكتروني ورقم الموبايل.")
     elif GOOGLE_SHEET_URL.startswith("https://script.google.com/macros/s/AKfycbxxxxxxxx"):
         st.warning("⚠️ الرجاء استبدال رابط GOOGLE_SHEET_URL بالرابط الصحيح من Google Apps Script.")
     else:
-        full_phone = f"{country_codes[selected_country]} {phone_number.strip()}"
+        full_phone = f"{country_codes[selected_country]} {st.session_state.phone_number.strip()}"
         record = {
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "name": name.strip(),
-            "email": email.strip(),
+            "name": st.session_state.name.strip(),
+            "email": st.session_state.email.strip(),
             "phone": full_phone,
-            "masterclass": masterclass,
-            "session": session,
+            "masterclass": st.session_state.masterclass,
+            "session": st.session_state.session,
         }
-        send_to_google_sheet(record)
+
+        if send_to_google_sheet(record):
+            st.session_state.submitted = True
+            # تفريغ الحقول
+            st.session_state.name = ""
+            st.session_state.email = ""
+            st.session_state.phone_number = ""
+            st.session_state.selected_country = "🇦🇪 الإمارات"
+            st.session_state.masterclass = "كتابة المحتوى للسوشيال ميديا - أشرف سالم"
+            st.session_state.session = "اليوم الأول"
+        else:
+            st.error("⚠️ حدث خطأ أثناء الإرسال إلى Google Sheet.")
 
 # -----------------------------------------------------
-# ملاحظة
+# رسالة النجاح
+# -----------------------------------------------------
+if st.session_state.submitted:
+    st.success("✅ تم تسجيل حضورك بنجاح!")
+    st.session_state.submitted = False
+
+# -----------------------------------------------------
+# ملاحظة أسفل الصفحة
 # -----------------------------------------------------
 st.markdown(
     """
