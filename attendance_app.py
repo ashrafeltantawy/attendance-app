@@ -1,6 +1,5 @@
 import streamlit as st
 import requests
-import time
 from datetime import datetime
 
 # -----------------------------------------------------
@@ -9,7 +8,7 @@ from datetime import datetime
 st.set_page_config(page_title="نظام تسجيل الحضور", page_icon="📝", layout="centered")
 
 # -----------------------------------------------------
-# تحميل CSS (من static أو من نفس المجلد)
+# تحميل CSS
 # -----------------------------------------------------
 def load_css():
     for path in ["static/style.css", "style.css"]:
@@ -28,7 +27,7 @@ load_css()
 GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbw8cBRPqxDeBT2PMxdijsMApk1kqBvfHW_XzPzTfDGsn9TTiIut4xxwXgpkKPV0dr3d0Q/exec"
 
 # -----------------------------------------------------
-# دالة جلب عدد المسجلين من Google Sheet
+# جلب عدد المسجلين
 # -----------------------------------------------------
 def get_registered_count():
     try:
@@ -41,7 +40,25 @@ def get_registered_count():
         return None
 
 # -----------------------------------------------------
-# شعار علوي + عداد
+# إعداد session_state
+# -----------------------------------------------------
+if "submitted" not in st.session_state:
+    st.session_state.submitted = False
+
+defaults = {
+    "name": "",
+    "email": "",
+    "selected_country": "🇦🇪 الإمارات",
+    "phone_number": "",
+    "masterclass": "كتابة المحتوى للسوشيال ميديا - أشرف سالم",
+    "session": "اليوم الأول",
+}
+
+for k, v in defaults.items():
+    st.session_state.setdefault(k, v)
+
+# -----------------------------------------------------
+# واجهة العداد والشعار
 # -----------------------------------------------------
 st.markdown(
     '<div class="form-logo-wrapper"><svg viewBox="0 0 512 512"><circle cx="256" cy="256" r="200" fill="#f0f0f0"/><text x="50%" y="53%" text-anchor="middle" font-size="140" font-family="sans-serif">📝</text></svg></div>',
@@ -51,23 +68,12 @@ st.header("📋 تسجيل حضور الماستر كلاس")
 
 count = get_registered_count()
 if count is not None:
-    st.markdown(f"<div style='text-align:center; font-size:18px; margin-bottom:15px;'>👥 عدد المسجلين حتى الآن: <b>{count}</b></div>", unsafe_allow_html=True)
+    st.markdown(
+        f"<div style='text-align:center; font-size:18px; margin-bottom:15px;'>👥 عدد المسجلين حتى الآن: <b>{count}</b></div>",
+        unsafe_allow_html=True
+    )
 else:
     st.markdown("<div style='text-align:center; color:#999;'>جارٍ تحميل عدد المسجلين...</div>", unsafe_allow_html=True)
-
-# -----------------------------------------------------
-# إعداد session_state للفورم
-# -----------------------------------------------------
-defaults = {
-    "name": "",
-    "email": "",
-    "selected_country": "🇦🇪 الإمارات",
-    "phone_number": "",
-    "masterclass": "كتابة المحتوى للسوشيال ميديا - أشرف سالم",
-    "session": "اليوم الأول",
-}
-for k, v in defaults.items():
-    st.session_state.setdefault(k, v)
 
 # -----------------------------------------------------
 # قائمة أكواد الدول
@@ -85,7 +91,7 @@ country_codes = {
 }
 
 # -----------------------------------------------------
-# عناصر الفورم
+# واجهة الإدخال
 # -----------------------------------------------------
 name = st.text_input("الاسم الكامل", key="name")
 email = st.text_input("البريد الإلكتروني", key="email")
@@ -114,7 +120,7 @@ session = st.selectbox(
 )
 
 # -----------------------------------------------------
-# دالة الإرسال إلى Google Sheet
+# إرسال البيانات
 # -----------------------------------------------------
 def send_to_google_sheet(record: dict):
     try:
@@ -124,10 +130,8 @@ def send_to_google_sheet(record: dict):
         return False
 
 # -----------------------------------------------------
-# زر التسجيل
+# الزر + منطق الإرسال
 # -----------------------------------------------------
-success_message = st.empty()  # لعرض رسالة النجاح تحت الزر
-
 if st.button("تسجيل الحضور", use_container_width=True):
     if not st.session_state.name.strip() or not st.session_state.email.strip() or not st.session_state.phone_number.strip():
         st.warning("⚠️ الرجاء إدخال الاسم والبريد الإلكتروني ورقم الموبايل.")
@@ -143,18 +147,19 @@ if st.button("تسجيل الحضور", use_container_width=True):
         }
 
         if send_to_google_sheet(record):
-            success_message.success("✅ تم تسجيل حضورك بنجاح!")
-
-            # تصفير الخانات بعد التسجيل
-            for key, value in defaults.items():
-                st.session_state[key] = value
-
-            # إبقاء الرسالة 3 ثواني
-            time.sleep(3)
-            success_message.empty()
-            st.rerun()
+            st.session_state.submitted = True
+            st.experimental_rerun()
         else:
             st.error("⚠️ حدث خطأ أثناء الإرسال إلى Google Sheet.")
+
+# -----------------------------------------------------
+# عرض رسالة النجاح + تصفير القيم
+# -----------------------------------------------------
+if st.session_state.submitted:
+    st.success("✅ تم تسجيل حضورك بنجاح!")
+    for k, v in defaults.items():
+        st.session_state[k] = v
+    st.session_state.submitted = False
 
 # -----------------------------------------------------
 # ملاحظة أسفل الصفحة
