@@ -3,7 +3,7 @@ import requests
 from datetime import datetime
 
 # -----------------------------------------------------
-# إعداد الصفحة العامة
+# إعداد الصفحة
 # -----------------------------------------------------
 st.set_page_config(page_title="نظام تسجيل الحضور", page_icon="📝", layout="centered")
 
@@ -18,13 +18,12 @@ def load_css():
                 return
         except FileNotFoundError:
             continue
-
 load_css()
 
 # -----------------------------------------------------
 # رابط Google Apps Script
 # -----------------------------------------------------
-GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbw8cBRPqxDeBT2PMxdijsMApk1kqBvfHW_XzPzTfDGsn9TTiIut4xxwXgpkKPV0dr3d0Q/exec"
+GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbz3hXsAawAMpu4LPj26-xntDvGWutZdjwl4dS-o570jKedIGRvyEizljrO5TvOMUCSt0Q/exec"
 
 # -----------------------------------------------------
 # دالة لجلب عدد المسجلين
@@ -39,19 +38,9 @@ def get_registered_count():
         return None
 
 # -----------------------------------------------------
-# تفعيل التحديث التلقائي للعداد كل 30 ثانية
+# تحديث تلقائي للعداد كل 30 ثانية
 # -----------------------------------------------------
-st_autorefresh = st.experimental_rerun if hasattr(st, "experimental_rerun") else None
-count_refresh = st.experimental_rerun
-st_autorefresh = st_autorefresh or st_autorefresh
-
-st_autorefresh = st_autorefresh or None
-# الطريقة الصحيحة الحديثة
-st_autorefresh = st_autorefresh or None
-
-# استخدام built-in autorefresh
-count_placeholder = st.empty()
-st_autorefresh(interval=30000, limit=None, key="refresh_count")
+st.experimental_autorefresh(interval=30000, key="auto_refresh_count")
 
 # -----------------------------------------------------
 # واجهة الشعار والعداد
@@ -64,18 +53,18 @@ st.header("📋 تسجيل حضور الماستر كلاس")
 
 count = get_registered_count()
 if count is not None:
-    count_placeholder.markdown(
+    st.markdown(
         f"<div style='text-align:center; font-size:18px; margin-bottom:15px;'>👥 عدد المسجلين حتى الآن: <b>{count}</b></div>",
         unsafe_allow_html=True,
     )
 else:
-    count_placeholder.markdown(
+    st.markdown(
         "<div style='text-align:center; color:#999;'>جارٍ تحميل عدد المسجلين...</div>",
         unsafe_allow_html=True,
     )
 
 # -----------------------------------------------------
-# إعداد session_state (لضمان الثبات)
+# إعداد session_state (ثابت)
 # -----------------------------------------------------
 defaults = {
     "name": "",
@@ -104,7 +93,7 @@ country_codes = {
 }
 
 # -----------------------------------------------------
-# واجهة الإدخال (ثابتة)
+# واجهة الإدخال (بدون تصفير)
 # -----------------------------------------------------
 name = st.text_input("الاسم الكامل", key="name")
 email = st.text_input("البريد الإلكتروني", key="email")
@@ -148,31 +137,4 @@ def send_to_google_sheet(record: dict):
 if st.button("تسجيل الحضور", use_container_width=True):
     if not name.strip() or not email.strip() or not phone_number.strip():
         st.warning("⚠️ الرجاء إدخال الاسم والبريد الإلكتروني ورقم الموبايل.")
-    else:
-        full_phone = f"{country_codes[selected_country]} {phone_number.strip()}"
-        record = {
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "name": name.strip(),
-            "email": email.strip(),
-            "phone": full_phone,
-            "masterclass": masterclass,
-            "session": session,
-        }
-
-        if send_to_google_sheet(record):
-            st.success("✅ تم تسجيل حضورك بنجاح!")
-        else:
-            st.error("⚠️ حدث خطأ أثناء الإرسال إلى Google Sheet.")
-
-# -----------------------------------------------------
-# ملاحظة أسفل الصفحة
-# -----------------------------------------------------
-st.markdown(
-    """
-    <div style='text-align:center; margin-top:40px; color:#666; font-size:0.9rem'>
-        يتم حفظ جميع البيانات مباشرة في Google Sheet.<br>
-        تأكد من أن الرابط مفعل للوصول العام (Anyone can access).
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
+    els
