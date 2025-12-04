@@ -489,6 +489,11 @@ div[data-baseweb="select"] svg {
     fill: #ffffff !important;
 }
 
+.st-cw {
+    white-space: nowrap;
+    color: #ffffff6b;
+}
+
 
 /* تأكيد إن الصفحة تبدأ من أعلى */
 html, body {
