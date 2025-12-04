@@ -32,6 +32,25 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+st.markdown("""
+    <style>
+    /* تغيير لون placeholder في selectbox */
+    div[data-baseweb="select"] > div {
+        color: white !important;     /* لون النص */
+    }
+
+    /* ستايل الـ placeholder نفسُه */
+    div[data-baseweb="select"] span {
+        color: #ffffff !important;   /* لون الـ placeholder */
+        opacity: 0.8 !important;
+    }
+
+    /* السهم (Arrow) */
+    div[data-baseweb="select"] svg {
+        fill: #ffffff !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 # -----------------------------------------------------
 
