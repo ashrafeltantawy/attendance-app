@@ -1,0 +1,481 @@
+/* ===============================
+   إعداد عام: RTL + خلفية
+   =============================== */
+
+/* اتجاه RTL ونص يمين */
+html, body, [class*="css"] {
+    direction: rtl !important;
+    text-align: right !important;
+
+/* نطبّق Tajawal على كل عناصر التطبيق داخل Streamlit */
+[data-testid="stAppViewContainer"],
+[data-testid="stAppViewContainer"] * {
+    font-family: 'Tajawal', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+}
+
+/* تأكيد على عناصر الفورم والأزرار */
+button, input, textarea, select, label {
+    font-family: 'Tajawal', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;}
+
+/* خلفية الصفحة بالجراديانت المطلوب */
+/* خلفية الجراديانت للتطبيق بالكامل */
+html, body {
+    background: linear-gradient(135deg, rgb(0, 0, 0), rgb(45, 45, 45)) !important;
+    font-family: 'Tajawal', sans-serif !important;
+}
+
+/* إجبار كونتينر التطبيق نفسه على نفس الخلفية */
+[data-testid="stAppViewContainer"] {
+    background: linear-gradient(135deg, rgb(0, 0, 0), rgb(45, 45, 45)) !important;
+}
+
+/* إزالة الخلفية البيضاء الافتراضية من الهيدر */
+[data-testid="stHeader"] {
+    background: transparent !important;
+}
+
+/* إزالة أي خلفية بيضاء من البلوك كونتينر */
+.block-container {
+    background: transparent !important;
+}
+
+/* إزالة الهوامش الزايدة وتوسيط المحتوى */
+.block-container {
+    max-width: 600px;
+    margin: 40px auto 60px auto;
+}
+
+/* ===============================
+   العداد
+   =============================== */
+
+/* ===== Flip Counter Style ===== */
+.flip-container {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-start;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.flip-digit {
+    perspective: 300px;
+}
+
+.flip-card {
+    width: 48px;
+    height: 72px;
+    background: linear-gradient(180deg, #000, #222);
+    color: #fff;
+    font-size: 42px;
+    font-weight: bold;
+    border-radius: 6px;
+    border: 1px solid #444;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transform-style: preserve-3d;
+    animation: flip 0.6s ease;
+}
+
+.flip-card-front,
+.flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flip-card-back {
+    transform: rotateX(180deg);
+}
+
+@keyframes flip {
+    0% { transform: rotateX(-90deg); }
+    100% { transform: rotateX(0deg); }
+}
+
+/* ===============================
+   اللوجو و العنوان
+   =============================== */
+
+/* تعديل تموضع الكونتينر عشان الهيدر يطلع فوق الصفحة تماماً */
+.block-container {
+    max-width: 600px;
+    margin: 0 auto 60px auto !important;  /* شلنا الـ 40px من فوق */
+    padding-top: 0 !important;
+}
+
+/* إخفاء زر Deploy والتولبار بالكامل */
+[data-testid="stToolbar"] {
+    display: none !important;
+}
+
+
+/* ===============================
+   هيدر الصفحة
+   =============================== */
+
+/* إصلاح الهيدر بحيث يحتوي اللوجو والزر جواته تماماً */
+.app-header {
+    direction: rtl;
+    width: 100vw;
+    margin: 0 calc(50% - 50vw) 24px;
+    padding: 12px 40px;
+    background: linear-gradient(135deg, rgb(0, 0, 0), rgb(45, 45, 45));
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    box-sizing: border-box;
+    z-index: 999;
+}
+
+
+/* اللوجو داخل الهيدر */
+.app-header img,
+.app-header .stImage img {
+    height: 42px;
+    width: auto;
+    display: block;
+}
+
+/* زر CTA داخل الهيدر */
+.header-cta {
+    display: inline-block;
+    background: #ffb703;
+    color: #1e1e1e;
+    padding: 10px 32px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.55);
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+
+/* ===============================
+   هيدر الصفحة
+
+h1, h2, h3 {
+    color: #ffffff;
+    text-align: center !important;
+}
+
+/* نصوص فرعية */
+.stMarkdown p {
+    color: #f0f0f0;
+}
+
+/* ===============================
+   صندوق الفورم (Glassmorphism)
+   =============================== */
+
+.stForm {
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-radius: 18px;
+    padding: 24px 22px 18px 22px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* مسافة بين عناصر الفورم */
+.stForm .stTextInput,
+.stForm .stSelectbox,
+.stForm .stColumns {
+    margin-bottom: 12px;
+}
+
+/* ===============================
+   حقول الإدخال و السيلكت
+   =============================== */
+
+input, select, textarea {
+    direction: rtl !important;
+    text-align: right !important;
+}
+
+/* صناديق الإدخال */
+.stTextInput > div > div > input {
+    background-color: rgb(0 0 0 / 90%) !important;
+    color: #ffffff !important;
+}
+
+/* القوائم المنسدلة */
+.stSelectbox > div > div {
+    background-color: rgba(0, 0, 0, 0.35) !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+}
+
+.stSelectbox > div > div > div {
+    color: #ffffff !important;
+}
+
+/* Placeholder ولون النص */
+.stTextInput input::placeholder {
+    color: rgba(220, 220, 220, 0.7) !important;
+}
+
+/* تسميات الحقول (Labels) */
+label {
+    color: #f5f5f5 !important;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+/* ===============================
+   زر تسجيل الحضور
+   =============================== */
+/* ستايل زر تسجيل الحضور داخل الفورم */
+
+/* زر تسجيل الحضور داخل الفورم */
+div[data-testid="stFormSubmitButton"] button {
+    background: #f7c933 !important;  /* أصفر جميل */
+    color: #000 !important;          /* كتابة سوداء */
+    border-radius: 999px !important;
+    border: none !important;
+    font-weight: 700 !important;
+    font-size: 1.2rem !important;
+    padding: 14px 0 !important;
+    width: 100% !important;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.35) !important;
+    transition: 0.2s ease-in-out !important;
+}
+
+/* إزالة أي طبقات داخلية تسبب الشكل الغريب */
+div[data-testid="stFormSubmitButton"] button::before,
+div[data-testid="stFormSubmitButton"] button::after {
+    display: none !important;
+    content: none !important;
+}
+
+/* تصحيح النص الداخلي فقط */
+div[data-testid="stFormSubmitButton"] button * {
+    color: #000 !important;   /* الكتابة سوداء فقط */
+}
+
+/* هوفر */
+div[data-testid="stFormSubmitButton"] button:hover {
+    background: #000 !important;      /* سوداء */
+    color: #f7c933 !important;        /* كتابة صفراء */
+    transform: translateY(-2px);
+}
+
+/* هوفر على النص الداخلي */
+div[data-testid="stFormSubmitButton"] button:hover * {
+    color: #f7c933 !important;
+}
+
+/* عند الضغط */
+div[data-testid="stFormSubmitButton"] button:active {
+    transform: translateY(1px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.45) !important;
+}
+
+/* ===============================
+   عدّاد عدد المسجلين
+   =============================== */
+
+/* ===== قسم عدّاد المسجلين ===== */
+.count-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 24px 0 32px 0;
+}
+
+/* شارة النص الصفراء */
+.count-label {
+    background: #ffcc00;
+    color: #000;
+    padding: 6px 18px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+}
+
+/* الكارد الداكن اللي تحت */
+.count-card {
+    width: 100%;
+    max-width: 600px;
+    background: linear-gradient(135deg, #050505, #222222);
+    border-radius: 20px;
+    padding: 14px 22px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    display: flex;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+/* تجميع الأرقام في المنتصف */
+.count-digits {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+/* البلوك الأبيض لكل رقم */
+.count-digit {
+    min-width: 42px;
+    padding: 6px 10px;
+    background: #ffffff;
+    color: #000000;
+    border-radius: 10px;
+    font-size: 32px;
+    font-weight: 700;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+
+
+/* ===============================
+   رسائل النجاح/التحذير/الخطأ
+   =============================== */
+
+.stAlert {
+    direction: rtl !important;
+    text-align: right !important;
+    border-radius: 12px !important;
+}
+
+/* نص داخل الرسائل */
+.stAlert p {
+    font-size: 0.9rem;
+}
+
+/* ===============================
+   تحسينات عامة
+   =============================== */
+
+
+
+/* تخصيص صندوق معلومات st.info */
+div[data-testid="stAlert"][role="alert"] {
+    background: #f1bd03 !important;      /* الخلفية صفراء */
+    color: #000 !important;              /* الخط أسود */
+    border: none !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+/* لون النص داخل الصندوق */
+div[data-testid="stAlert"] p {
+    color: #000 !important;
+    font-weight: 600;
+}
+
+/* تغيير لون أيقونة info */
+div[data-testid="stAlert"] svg {
+    fill: #000 !important;  /* يجعل الأيقونة سوداء */
+}
+
+.stAlert {
+    direction: rtl !important;
+    text-align: right !important;
+    border-radius: 12px !important;
+    background: #f1bd03;
+}
+
+
+/* جعل النصوص في الفورم أوضح */
+.stForm p {
+    color: #eaeaea;
+}
+
+/* مسافات أسفل الصفحة */
+footer {
+    visibility: hidden;
+}
+
+
+/* إزالة المسافة العلوية الخاصة بـ Streamlit */
+[data-testid="stAppViewContainer"] {
+    padding-top: 0 !important;
+}
+
+/* إخفاء الهيدر الافتراضي بالكامل */
+[data-testid="stHeader"] {
+    height: 0px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+}
+
+/* إزالة مساحة decoration */
+[data-testid="stDecoration"] {
+    height: 0px !important;
+}
+
+/* أقوى كود لتغيير لون placeholder للـ selectbox */
+div[data-baseweb="select"] span[class*="placeholder"] {
+    color: #ffffff !important;
+    opacity: 0.9 !important;
+}
+
+
+.mc-count-row {
+    direction: rtl;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0,0,0,0.35);
+    border-radius: 12px;
+    padding: 8px 14px;
+    margin: 4px 0;
+    color: #fff;
+    font-size: 0.95rem;
+}
+
+.mc-title {
+    flex: 1;
+    margin-left: 12px;
+}
+
+.mc-badge {
+    min-width: 40px;
+    text-align: center;
+    background: #deb73c;
+    color: #000;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-weight: 700;
+}
+
+/* إخفاء مربع "Running..." */
+/* إخفاء شريط "Running get_all_counts" بالكامل */
+div[data-testid="stStatusWidget"] {
+    display: none !important;
+}
+div[data-testid="stStatusWidget"] * {
+    display: none !important;
+}
+
+
+.st-emotion-cache-z2ex0e {
+    width: 100%;
+    height: 190px;
+    max-width: 100%;
+    min-width: 1rem;
+    position: relative;
+    overflow: visible;
+    flex: 0 0 140px;
+
+/* تأكيد إن الصفحة تبدأ من أعلى */
+html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+
+

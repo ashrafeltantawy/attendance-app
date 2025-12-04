@@ -1,47 +1,76 @@
 import streamlit as st
 import requests
 from datetime import datetime
-import json
 import html
 import streamlit.components.v1 as components
+import base64
+from pathlib import Path
+
+
+def load_image_base64(img_path: str) -> str:
+    img_bytes = Path(img_path).read_bytes()
+    return base64.b64encode(img_bytes).decode("utf-8")
+
+logo_base64 = load_image_base64("edraak_logo.png")  # غيّر المسار لو ملفك في مكان تاني
 
 # -----------------------------------------------------
+
+# -----------------------------------------------------
+# هيدر الصفحة (لوجو + زر تسجيل)
+# -----------------------------------------------------
+st.markdown(
+    f"""
+    <div class="app-header">
+        <div class="header-logo">
+            <img src="data:image/png;base64,{logo_base64}" class="logo-img" />
+        </div>
+        <div class="cta-box">
+            <span  class="header-cta">سجل حضورك في ماستر كلاس أكاديمية ادراك للإعلام</span>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+
+# -----------------------------------------------------
+
 # إعداد الصفحة العامة
-# -----------------------------------------------------
-st.set_page_config(page_title="نظام تسجيل الحضور", page_icon="📝", layout="centered")
+
 
 # -----------------------------------------------------
-# تحميل CSS (تصميم الواجهة) + إصلاح الوميض
+st.set_page_config(
+    page_title="تسجيل الحضور في ماستر كلاس اكاديمية ادراك للإعلام",
+    page_icon="📝",
+    layout="centered"
+)
+
+# -----------------------------------------------------
+# تحميل CSS من ملف خارجي
 # -----------------------------------------------------
 def load_css():
-    # تحميل ملفات CSS الخارجية (إذا كانت موجودة)
-    for path in ["static/style.css", "style.css"]:
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-        except FileNotFoundError:
-            pass # Continue if file not found
-    
-    # CSS Fix for flickering/opacity changes during reruns
-    stability_css = """
-    <style>
-    .stApp {
-        opacity: 1 !important; 
-        transition: none !important;
-    }
-    .stTextInput, .stSelectbox {
-        transition: none;
-    }
-    </style>
-    """
-    st.markdown(stability_css, unsafe_allow_html=True)
+    # تحميل خط Tajawal من Google Fonts
+    st.markdown("""
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    """, unsafe_allow_html=True)
+
+    # تحميل ملف CSS المخصص
+    try:
+        with open("style.css", "r", encoding="utf-8") as f:
+            css = f.read()
+        st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+    except FileNotFoundError:
+        st.warning("⚠️ ملف style.css غير موجود في نفس مجلد التطبيق.")
+
 
 load_css()
 
 # -----------------------------------------------------
 # رابط Google Apps Script
 # -----------------------------------------------------
-GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbw8cBRPqxDeBT2PMxdijsMApk1kqBvfHW_XzPzTfDGsn9TTiIut4xxwXgpkKPV0dr3d0Q/exec"
+GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzSDT_YWKb-kttfuE8LD0di3fjHmN0fpr_q7EE6tSsdnbgaOdOWbG1338xwZ44jwq8GRg/exec"  # عدّل هذا بالرابط الصحيح
 
 # -----------------------------------------------------
 # قائمة أكواد الدول
@@ -50,39 +79,86 @@ country_codes = {
     "🇦🇪 الإمارات": "00971",
     "🇸🇦 السعودية": "00966",
     "🇪🇬 مصر": "0020",
+    "🇸🇩 السودان": "00249",
+    "🇯🇴 الأردن": "00962",
+    "🇧🇭 البحرين": "00973",
     "🇶🇦 قطر": "00974",
     "🇰🇼 الكويت": "00965",
-    "🇧🇭 البحرين": "00973",
-    "🇴🇲 عمان": "00968",
-    "🇯🇴 الأردن": "00962",
-    "🇱🇧 لبنان": "00961",
 }
 
 # -----------------------------------------------------
-# القيم الافتراضية للحقول
+# القيم الافتراضية للمستخدم
 # -----------------------------------------------------
 defaults = {
     "name": "",
     "email": "",
     "selected_country": "🇦🇪 الإمارات",
     "phone_number": "",
-    "masterclass": "كتابة المحتوى للسوشيال ميديا - أشرف سالم",
-    "session": "اليوم الأول",
+    "masterclass": "",
+    "session": "",
     "submission_status": None,
 }
 
 # -----------------------------------------------------
-# دالة لجلب عدد المسجلين
+# تهيئة session_state بالقيم الافتراضية
 # -----------------------------------------------------
-def get_registered_count_initial():
+for k, v in defaults.items():
+    st.session_state.setdefault(k, v)
+
+# فضي قيمة الماستر كلاس مرة واحدة أول تحميل
+if "page_loaded" not in st.session_state:
+    st.session_state["page_loaded"] = True
+    st.session_state["masterclass"] = None
+
+# -----------------------------------------------------
+# جدول ربط كل ماستر كلاس باليوم/الوقت
+# -----------------------------------------------------
+MASTERCLASS_SCHEDULE = {
+    "الذكاء الاصطناعي بين الحقيقة والتزييف - فهمي متولي": "الإثنين 8 ديسمبر، 11:30 صباحاً",
+    "فك شفرة العلامات التجارية - حذيفة تاج السر": "الإثنين 8 ديسمبر، 02:00 ظهراً",
+    "كيف تكتب محتوى فيديو ناجح؟ - أشرف سالم الطنطاوي": "الثلاثاء 9 ديسمبر، 11:30 صباحاً",
+    "خرافات التسويق - يحيى نايل": "الثلاثاء 9 ديسمبر، 02:00 ظهراً",
+    "صناعة المحتوى التراثي – يوسف بالحمر ومحمد البلوشي وهزاع الشرياني": "الأربعاء 9 ديسمبر، 03:00 مساءاً",
+}
+
+MASTERCLASS_OPTIONS = list(MASTERCLASS_SCHEDULE.keys())
+
+# أسماء مختصرة لعرضها داخل الكروت
+MASTERCLASS_SHORT_NAMES = {
+    "الذكاء الاصطناعي بين الحقيقة والتزييف - فهمي متولي": "الذكاء الاصطناعي",
+    "فك شفرة العلامات التجارية - حذيفة تاج السر": "العلامات التجارية",
+    "كيف تكتب محتوى فيديو ناجح؟ - أشرف سالم الطنطاوي": "كتابة المحتوى",
+    "خرافات التسويق - يحيى نايل": "خرافات التسويق",
+    "صناعة المحتوى التراثي – يوسف بالحمر ومحمد البلوشي وهزاع الشرياني": "المحتوى التراثي",
+}
+
+
+# -----------------------------------------------------
+# تهيئة session_state بالقيم الافتراضية
+# -----------------------------------------------------
+for k, v in defaults.items():
+    st.session_state.setdefault(k, v)
+
+# -----------------------------------------------------
+# دالة جلب عدد المسجلين (GET)
+# -----------------------------------------------------
+# -----------------------------------------------------
+# دالة جلب كل الأعداد (الإجمالي + كل ماستر كلاس) في طلب واحد
+# -----------------------------------------------------
+@st.cache_data(ttl=30, show_spinner=False)
+def get_all_counts():
+    """
+    تجيب عدد المسجلين الإجمالي + عدد كل ماستر كلاس
+    من Google Apps Script (اللي بيرجع JSON).
+    """
     try:
         r = requests.get(GOOGLE_SHEET_URL, timeout=5)
         if r.status_code == 200:
-            txt = r.text.strip()
-            return int(txt) if txt.isdigit() else None
-        return None
+            return r.json()  # متوقَّع يرجّع dict فيه total وباقي الماستر كلاس
+        return {}
     except Exception:
-        return None
+        return {}
+
 
 # -----------------------------------------------------
 # دالة الإرسال إلى Google Sheet (POST)
@@ -94,29 +170,35 @@ def send_to_google_sheet(record: dict) -> bool:
     except Exception:
         return False
 
+
 # -----------------------------------------------------
-# دالة الإرسال وإعادة التعيين (Callback)
+# دالة الإرسال وإعادة التعيين
 # -----------------------------------------------------
 def submit_and_reset_form():
-    """
-    تُرسل البيانات ثم تُعيد تعيين قيم session_state.
-    تُستدعى عبر on_click لتحديث الحالة بأمان.
-    """
-    # جلب القيم من session_state مباشرة (التي تم تحديثها بواسطة النموذج)
     name = st.session_state["name"].strip()
     email = st.session_state["email"].strip()
     phone_number = st.session_state["phone_number"].strip()
     selected_country = st.session_state["selected_country"]
-    masterclass = st.session_state["masterclass"]
-    session = st.session_state["session"]
+    masterclass = st.session_state.get("masterclass")
 
-    # 1. التحقق من صحة البيانات
+    # التحقق من اختيار الماستر كلاس
+    if not masterclass:
+        st.session_state["submission_status"] = "no_masterclass"
+        return
+
+    # تحديد اليوم/الوقت تلقائيًا بناءً على الماستر كلاس
+    session = MASTERCLASS_SCHEDULE.get(masterclass, "")
+
+    # التحقق من اكتمال البيانات الأساسية
     if not name or not email or not phone_number:
         st.session_state["submission_status"] = "incomplete"
         return
 
-    # 2. إعداد حمولة البيانات
+
+    # تجهيز رقم الهاتف مع كود الدولة
     full_phone = f"{country_codes[selected_country]} {phone_number}"
+
+    # تجهيز البيانات لإرسالها إلى Google Sheet
     payload = {
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "name": name,
@@ -126,128 +208,294 @@ def submit_and_reset_form():
         "session": session,
     }
 
-    # 3. الإرسال وإعادة التعيين
+    # إرسال البيانات
     if send_to_google_sheet(payload):
         st.session_state["submission_status"] = "success"
-        
-        # تفريغ الحقول النصية والقيم الأخرى (هذه الخطوة آمنة الآن)
+
+        # إعادة تعيين القيم بعد نجاح الإرسال
         st.session_state["name"] = ""
         st.session_state["email"] = ""
         st.session_state["phone_number"] = ""
-        # إعادة تعيين SelectBox إلى قيمها الافتراضية
         st.session_state["selected_country"] = defaults["selected_country"]
-        st.session_state["masterclass"] = defaults["masterclass"]
-        st.session_state["session"] = defaults["session"]
-    else:
-        st.session_state["submission_status"] = "error"
 
-# -----------------------------------------------------
-# تهيئة session_state
-# -----------------------------------------------------
-for k, v in defaults.items():
-    st.session_state.setdefault(k, v)
-
-
+    st.session_state["masterclass"] = None
+    st.session_state["session"] = ""
 # -----------------------------------------------------
 # الشعار + العنوان
 # -----------------------------------------------------
-st.markdown(
-    '<div class="form-logo-wrapper"><svg viewBox="0 0 512 512">'
-    '<circle cx="256" cy="256" r="200" fill="#f0f0f0"/>'
-    '<text x="50%" y="53%" text-anchor="middle" font-size="140" font-family="sans-serif">📝</text>'
-    '</svg></div>',
-    unsafe_allow_html=True
-)
-st.header("📋 تسجيل حضور الماستر كلاس")
+# -----------------------------------------------------
+# لوجو أعلى الصفحة (صورة جديدة)
+# -----------------------------------------------------
+# -----------------------------------------------------
+# هيدر الصفحة (لوجو يمين + عنوان يسار)
+# -----------------------------------------------------
+# -----------------------------------------------------
+# هيدر الصفحة (لوجو يمين + عنوان يسار)
+# -----------------------------------------------------
+# -----------------------------------------------------
+# هيدر الصفحة (لوجو يمين + عنوان يسار)
+# -----------------------------------------------------
 
 # -----------------------------------------------------
-# عدّاد المسجلين (JS)
+# عدّاد الحضور أعلى النموذج
 # -----------------------------------------------------
-initial_count = get_registered_count_initial()
+# -----------------------------------------------------
+# عدّاد الحضور أعلى النموذج (Flip Counter)
+# -----------------------------------------------------
+# -----------------------------------------------------
+# عدّاد الحضور أعلى النموذج (تصميم كارد في المنتصف)
+# -----------------------------------------------------
+# -----------------------------------------------------
+# عدّاد الحضور أعلى النموذج (كارد في المنتصف)
+# -----------------------------------------------------
+
+# -----------------------------------------------------
+# جلب كل الأعداد مرة واحدة
+# -----------------------------------------------------
+all_counts = get_all_counts()
+
+# العدد الإجمالي للمسجلين (لعدّاد الصفحة الرئيسي)
+initial_count = all_counts.get("total")
 initial_count_text = str(initial_count) if initial_count is not None else "—"
+
 safe_url = html.escape(GOOGLE_SHEET_URL, quote=True)
 
 counter_html = f"""
-<div id="count-box" style="text-align:center; font-size:18px; margin-bottom:15px;">
-  👥 عدد المسجلين حتى الآن: <b id="count">{initial_count_text}</b>
-</div>
-<script>
-  const url = "{safe_url}";
-  async function updateCount() {{
-    try {{
-      const res = await fetch(url, {{ method: "GET", cache: "no-store" }});
-      if (!res.ok) return;
-      const txt = (await res.text()).trim();
-      const n = parseInt(txt, 10);
-      if (!Number.isNaN(n)) {{
-        const el = document.getElementById("count");
-        if (el) el.textContent = n.toString();
-      }}
-    }} catch (e) {{
-      // تجاهل الأخطاء الشبكية بصمت
-    }}
+<style>
+  body {{
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    font-family: "Tajawal", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }}
+
+  .count-section {{
+    direction: rtl;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 5px 0 0 0;
+  }}
+
+  .count-label {{
+    color: #deb73c;
+    padding: 6px 20px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 1.95rem;
+    margin-bottom: 12px;
+    text-align: center;
+  }}
+
+.count-card {{
+    width: 100%;
+    max-width: 600px;
+    background: linear-gradient(135deg, #050505, #222222);
+    border-radius: 20px;
+    padding: 5px 22px;
+    margin-top: 0px;        /* ← مسافة بين الشارة والعداد */
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center; /* ← يخلي الرقم في النص */
+}}
+
+  .count-digits {{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    min-width: 50px;
+    padding: 5px 12px;
+    font-size: 36px;
+
+  }}
+
+  .count-digit {{
+    min-width: 42px;
+    padding: 6px 10px;
+    background: #deb73c;
+    color: #000000;
+    border-radius: 10px;
+    font-size: 32px;
+    font-weight: 700;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    text-align: center;
+  }}
+</style>
+
+<div class="count-section">
+  <div class="count-label"> عدد المسجلين حتى الآن</div>
+
+  <div class="count-card">
+    <div id="flip-container" class="count-digits"></div>
+  </div>
+</div>
+
+<script>
+  function renderCount(numText) {{
+    var container = document.getElementById("flip-container");
+    if (!container) return;
+
+    var s = String(numText).trim();
+    if (s === "" || s === "—") {{
+      container.innerHTML = "<span class='count-digit'>—</span>";
+      return;
+    }}
+
+    var html = "";
+    for (var i = 0; i < s.length; i++) {{
+      var ch = s[i];
+      if (ch < '0' || ch > '9') continue;
+      html += "<div class='count-digit'>" + ch + "</div>";
+    }}
+    container.innerHTML = html;
+  }}
+
+  function updateCount() {{
+    fetch("{safe_url}")
+      .then(r => r.text())
+      .then(t => {{
+        var n = parseInt(t.trim());
+        if (!isNaN(n)) {{
+          renderCount(n.toString());
+        }}
+      }})
+      .catch(e => {{}});
+  }}
+
+  // أول عرض من القيمة اللي جاية من بايثون
+  renderCount("{initial_count_text}");
   updateCount();
   setInterval(updateCount, 30000);
 </script>
 """
-components.html(counter_html, height=60)
+
+components.html(counter_html, height=190)
 
 # -----------------------------------------------------
-# واجهة الإدخال (باستخدام st.form)
+# كروت عدد المسجلين في كل ماستر كلاس (عرضياً)
 # -----------------------------------------------------
-# استخدام st.form يمنع إعادة الرسم الكاملة أثناء الكتابة (يحل مشكلة الوميض)
-with st.form(key='attendance_form'):
+cards_per_row = 5  # عدد الكروت في كل صف (غيّره لـ 2 لو حابب)
+for i in range(0, len(MASTERCLASS_OPTIONS), cards_per_row):
+    row_masterclasses = MASTERCLASS_OPTIONS[i : i + cards_per_row]
+    cols = st.columns(len(row_masterclasses))
+
+    for col, mc in zip(cols, row_masterclasses):
+        count = all_counts.get(mc, 0)
+        short_name = MASTERCLASS_SHORT_NAMES.get(mc, mc)
+
+        html_card = f"""
+<div style="
+    background: #deb73c;
+    border-radius:16px;
+    padding:18px 16px;
+    margin-bottom:16px;
+    text-align:center;
+    box-shadow:0 4px 10px rgba(0,0,0,0.25);
+">
+    <div style="
+        color:#000;
+        Font-size:12px;
+        font-weight:600;
+        margin-bottom:14px;
+    ">
+        {short_name}
+    </div>
+
+    <div style="
+        background:#000;
+        color:#deb73c;
+        width:40px;
+        Height:40px;
+        border-radius:50%;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:14px;
+        font-weight:700;
+        margin:0 auto;
+    ">
+        {count}
+    </div>
+</div>
+"""
+
+        with col:
+            st.html(html_card)   # ← الحل السحري
+
+# -----------------------------------------------------
+# اختيار الماستر كلاس + عرض الموعد (خارج الفورم)
+# -----------------------------------------------------
+
+MASTERCLASS_OPTIONS = list(MASTERCLASS_SCHEDULE.keys())
+
+selected_masterclass = st.selectbox(
+    label="",                     # بدون عنوان فوق البوكس
+    options=MASTERCLASS_OPTIONS,
+    index=None,                   # ما فيش اختيار افتراضي
+    placeholder="اختر الماستر كلاس",  # يظهر داخل البوكس نفسه
+    key="masterclass",
+)
+
+session_info = MASTERCLASS_SCHEDULE.get(selected_masterclass or "", "")
+
+if session_info:
+    st.info(
+        f"""🕒 موعد هذا الماستر كلاس: {session_info}.
+
+📍المكان: مركز أبوظبي الوطني للمعارض - جناح إدراك ميديا أكاديمي.
+""",
+    )
+
+
+# -----------------------------------------------------
+# نموذج إدخال البيانات (باستخدام st.form)
+# -----------------------------------------------------
+with st.form(key="attendance_form"):
     st.text_input("الاسم الكامل", key="name")
     st.text_input("البريد الإلكتروني", key="email")
 
     col_code, col_phone = st.columns([1, 2])
     with col_code:
         st.selectbox(
-            "كود الدولة", list(country_codes.keys()), index=0, key="selected_country"
+            "كود الدولة",
+            list(country_codes.keys()),
+            index=0,
+            key="selected_country",
         )
     with col_phone:
         st.text_input("رقم الموبايل", placeholder="5xxxxxxxx", key="phone_number")
 
-    st.selectbox(
-        "اختر الماستر كلاس",
-        [
-            "كيف تتحقق من الأخبار باستخدام الذكاء الاصطناعي - فهمي متولي",
-            "كتابة المحتوى للسوشيال ميديا - أشرف سالم",
-            "كتابة وصياغة الأخبار للسوشيال ميديا - محمد عواد",
-            "تصحيح مفاهيم التسويق الرقمي - يحيى نايل",
-        ],
-        key="masterclass"
-    )
-
-    st.selectbox(
-        "اختر اليوم / الجلسة",
-        ["اليوم الأول", "اليوم الثاني", "اليوم الثالث"],
-        key="session"
-    )
-    
-    # الزر الآن يستخدم on_click مباشرة لإرسال البيانات وتفريغ الحقول بأمان
     st.form_submit_button(
-        "تسجيل الحضور", 
+        "تسجيل الحضور",
         use_container_width=True,
-        on_click=submit_and_reset_form # ⬅️ هذا يحل مشكلة الـ StreamlitAPIException
+        on_click=submit_and_reset_form,
     )
 
 # -----------------------------------------------------
 # عرض رسالة الحالة بعد الإرسال
 # -----------------------------------------------------
-# يتم عرض الرسالة بعد اكتمال إعادة الرسم الناتجة عن الـ on_click
 status = st.session_state["submission_status"]
 
 if status == "success":
     st.success("✅ تم تسجيل حضورك بنجاح!")
-    st.session_state["submission_status"] = None 
-elif status == "error":
-    st.error("⚠️ حدث خطأ أثناء الإرسال إلى Google Sheet. تأكد أن السكربت منشور كـ Web App ومتاح (Anyone).")
     st.session_state["submission_status"] = None
+
+elif status == "error":
+    st.error(
+        "⚠️ حدث خطأ أثناء الإرسال إلى Google Sheet. تأكد أن السكربت منشور كـ Web App ومتاح (Anyone)."
+    )
+    st.session_state["submission_status"] = None
+
 elif status == "incomplete":
     st.warning("⚠️ الرجاء إدخال الاسم والبريد الإلكتروني ورقم الموبايل.")
     st.session_state["submission_status"] = None
+
+elif status == "no_masterclass":
+    st.warning("⚠️ الرجاء اختيار الماستر كلاس من القائمة أولاً.")
+    st.session_state["submission_status"] = None
+
 
 # -----------------------------------------------------
 # ملاحظة أسفل الصفحة
