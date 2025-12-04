@@ -471,6 +471,25 @@ div[data-testid="stStatusWidget"] * {
     overflow: visible;
     flex: 0 0 140px;
 
+
+/* placeholder الأساسي */
+div[data-baseweb="select"] div[role="button"] span[data-testid="placeholder"] {
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
+
+/* fallback لو placeholder داخل div */
+div[data-baseweb="select"] div[role="button"] div[data-testid="placeholder"] {
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
+
+/* السهم */
+div[data-baseweb="select"] svg {
+    fill: #ffffff !important;
+}
+
+
 /* تأكيد إن الصفحة تبدأ من أعلى */
 html, body {
     margin: 0 !important;
