@@ -454,7 +454,7 @@ for i in range(0, len(MASTERCLASS_OPTIONS), cards_per_row):
 MASTERCLASS_OPTIONS = list(MASTERCLASS_SCHEDULE.keys())
 
 selected_masterclass = st.selectbox(
-    label="",                     # بدون عنوان فوق البوكس
+    label="اختر الماستر كلاس",
     options=MASTERCLASS_OPTIONS,
     index=None,                   # ما فيش اختيار افتراضي
     placeholder="اختر الماستر كلاس",  # يظهر داخل البوكس نفسه
