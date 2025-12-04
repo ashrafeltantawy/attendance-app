@@ -33,24 +33,28 @@ st.markdown(
 )
 
 st.markdown("""
-    <style>
-    /* تغيير لون placeholder في selectbox */
-    div[data-baseweb="select"] > div {
-        color: white !important;     /* لون النص */
+<style>
+
+    /* تغيير لون ال-placeholder في selectbox */
+    div[data-baseweb="select"] div[role="button"] span[data-testid="placeholder"] {
+        color: #ffffff !important;
+        opacity: 1 !important;
     }
 
-    /* ستايل الـ placeholder نفسُه */
-    div[data-baseweb="select"] span {
-        color: #ffffff !important;   /* لون الـ placeholder */
-        opacity: 0.8 !important;
+    /* بعض النسخ بتحط الـ placeholder داخل div مش span */
+    div[data-baseweb="select"] div[role="button"] div[data-testid="placeholder"] {
+        color: #ffffff !important;
+        opacity: 1 !important;
     }
 
-    /* السهم (Arrow) */
+    /* تغيير لون السهم */
     div[data-baseweb="select"] svg {
         fill: #ffffff !important;
     }
-    </style>
+
+</style>
 """, unsafe_allow_html=True)
+
 
 # -----------------------------------------------------
 
