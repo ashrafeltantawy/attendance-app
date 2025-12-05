@@ -161,6 +161,42 @@ html, body {
 }
 
 
+@media (max-width: 768px) {
+
+    /* ترتيب الهيدر عمودي */
+    .app-header {
+        flex-direction: column;
+        align-items: center;     /* يخلي كل شيء في النص */
+        gap: 12px;
+        padding: 16px;
+        text-align: center;
+    }
+
+    /* الزر الأصفر — فوق */
+    .header-cta {
+        order: 1;
+        width: 100%;
+        text-align: center;
+    }
+
+    /* اللوجو — تحت */
+    .app-header .stImage {
+        order: 2;
+        width: 100%;
+        display: flex !important;
+        justify-content: center !important;   /* يحط الصورة في النص */
+    }
+
+    /* الصورة نفسها */
+    .app-header img,
+    .app-header .stImage img {
+        height: 44px;
+        width: auto;
+        margin: 0 auto;  /* سنتر إضافي للتأكيد */
+        display: block;
+    }
+}
+
 /* ===============================
    هيدر الصفحة
 
